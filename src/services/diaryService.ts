@@ -5,7 +5,7 @@ export interface DiaryEntry {
     profile_id: number;
     title: string;
     event: string;
-    feelings: string;
+    feelings: string[];
     intensity: number;
     thoughts: string;
     reactions: string;
@@ -26,7 +26,7 @@ export const createDiaryEntry = async (entry: Omit<DiaryEntry, "id" | "created_a
             entry.profile_id,
             entry.title,
             entry.event,
-            entry.feelings,
+            entry.feelings.join(", "),
             entry.intensity,
             entry.thoughts,
             entry.reactions,
@@ -46,7 +46,18 @@ export const getEntryById = async (id: number): Promise<DiaryEntry | null> => {
         `SELECT * FROM Diary WHERE id = ?;`,
         [id]
     );
-    return result as DiaryEntry | null;
+    
+    if (!result) {
+        return null;
+    }
+    
+    // Converte a string feelings de volta para array
+    const entry = result as any;
+    if (entry.feelings) {
+        entry.feelings = entry.feelings.split(', ');
+    }
+    
+    return entry as DiaryEntry;
 };
 
 // TODO: implementar getAllEntries com paginação 

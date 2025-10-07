@@ -1,9 +1,22 @@
 import * as SQLite from 'expo-sqlite';
 
-const db = SQLite.openDatabaseSync('diary.db');
+let db: SQLite.SQLiteDatabase;
 
-// Exportamos a função de inicialização e a instância do DB
-export const initDB = () => {
+// Função para inicializar o banco com nome customizado
+export const initDB = (dbName: string = 'diary.db') => {
+    // Fecha o banco anterior se existir
+    if (db) {
+        try {
+            db.closeSync();
+        } catch (error) {
+            // Ignora erro se o banco já estiver fechado
+        }
+    }
+    
+    // Abre o novo banco
+    db = SQLite.openDatabaseSync(dbName);
+    
+    // Cria as tabelas
     try {
         db.execSync(
             `CREATE TABLE IF NOT EXISTS Profile (
@@ -40,4 +53,41 @@ export const initDB = () => {
     }
 };
 
-export const getDB = () => db;
+export const getDB = () => {
+    if (!db) {
+        throw new Error('Database não foi inicializado. Chame initDB() primeiro.');
+    }
+    return db;
+};
+
+// Função específica para testes
+export const initTestDB = () => {
+    const testDbName = `:memory:`; // Banco em memória para testes
+    initDB(testDbName);
+    return db;
+};
+
+// Função para limpar dados de teste
+export const clearTestData = () => {
+    if (!db) return;
+    
+    try {
+        db.runSync('DELETE FROM Diary');
+        db.runSync('DELETE FROM Profile');
+        // Reset dos auto-increment
+        db.runSync('DELETE FROM sqlite_sequence WHERE name IN ("Diary", "Profile")');
+    } catch (error) {
+        console.error('Erro ao limpar dados de teste:', error);
+    }
+};
+
+// Função para fechar banco (útil para testes)
+export const closeDB = () => {
+    if (db) {
+        try {
+            db.closeSync();
+        } catch (error) {
+            console.error('Erro ao fechar banco:', error);
+        }
+    }
+};
