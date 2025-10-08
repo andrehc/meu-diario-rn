@@ -16,19 +16,19 @@ class MockSQLiteDatabase {
 
   runSync(sql: string, params: any[] = []) {
     console.log('Mock runSync:', sql, params);
-    
+
     if (sql.includes('INSERT INTO Profile')) {
       const profiles = this.data.get('Profile') || [];
       const newProfile = {
         id: params[0],
         name: params[1],
-        email: params[2]
+        email: params[2],
       };
       profiles.push(newProfile);
       this.data.set('Profile', profiles);
       return { lastInsertRowId: params[0] };
     }
-    
+
     if (sql.includes('INSERT INTO Diary')) {
       const diaries = this.data.get('Diary') || [];
       this.lastId++;
@@ -43,13 +43,13 @@ class MockSQLiteDatabase {
         reactions: params[6],
         alternative: params[7],
         current_mood: params[8],
-        created_at: Date.now()
+        created_at: Date.now(),
       };
       diaries.push(newDiary);
       this.data.set('Diary', diaries);
       return { lastInsertRowId: this.lastId };
     }
-    
+
     if (sql.includes('DELETE FROM')) {
       const tableName = sql.match(/DELETE FROM (\w+)/)?.[1];
       if (tableName) {
@@ -57,19 +57,19 @@ class MockSQLiteDatabase {
       }
       return { changes: 1 };
     }
-    
+
     return { lastInsertRowId: 0, changes: 0 };
   }
 
   getFirstSync(sql: string, params: any[] = []) {
     console.log('Mock getFirstSync:', sql, params);
-    
+
     if (sql.includes('SELECT * FROM Diary WHERE id = ?')) {
       const diaries = this.data.get('Diary') || [];
       const found = diaries.find((diary: any) => diary.id === params[0]);
       return found || null;
     }
-    
+
     return null;
   }
 
@@ -80,7 +80,7 @@ class MockSQLiteDatabase {
 }
 
 export const mockSQLite = {
-  openDatabaseSync: jest.fn(() => new MockSQLiteDatabase())
+  openDatabaseSync: jest.fn(() => new MockSQLiteDatabase()),
 };
 
 // Mock do módulo expo-sqlite

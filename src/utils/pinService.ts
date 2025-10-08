@@ -7,8 +7,8 @@ const saltRounds = 10;
  * @returns Hash do PIN.
  */
 export const hashPin = async (pin: string): Promise<string> => {
-    const salt = await bcrypt.genSalt(saltRounds);
-    return bcrypt.hash(pin, salt);
+  const salt = await bcrypt.genSalt(saltRounds);
+  return bcrypt.hash(pin, salt);
 };
 
 /**
@@ -16,6 +16,9 @@ export const hashPin = async (pin: string): Promise<string> => {
  * @param hashPin - Hash do PIN armazenado.
  * @returns true se o PIN fornecido é igual ao hash armazenado, senao false.
  */
-export const comparePin = async (pin: string, hashPin: string): Promise<boolean> => {
-    return bcrypt.compare(pin, hashPin);
+export const comparePin = async (
+  pin: string,
+  hashPin: string
+): Promise<boolean> => {
+  return bcrypt.compare(pin, hashPin);
 };
