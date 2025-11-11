@@ -19,14 +19,52 @@ class MockSQLiteDatabase {
 
     if (sql.includes('INSERT INTO Profile')) {
       const profiles = this.data.get('Profile') || [];
-      const newProfile = {
-        id: params[0],
-        name: params[1],
-        email: params[2],
-      };
+      this.lastId++;
+      
+      // Mapear parâmetros baseado na consulta SQL
+      let newProfile: any = { id: this.lastId };
+      
+      if (sql.includes('google_id')) {
+        // Inserção com campos do Google
+        newProfile = {
+          id: this.lastId,
+          name: params[0],
+          phone: params[1],
+          email: params[2],
+          profile_image: params[3],
+          psychologist_name: params[4],
+          psychologist_phone: params[5],
+          pin_enabled: params[6],
+          pin_hash: params[7],
+          login_provider: params[8],
+          google_id: params[9],
+          google_access_token: params[10],
+          google_refresh_token: params[11],
+          google_expires_at: params[12],
+        };
+      } else {
+        // Inserção sem campos do Google (perfil local)
+        newProfile = {
+          id: this.lastId,
+          name: params[0],
+          phone: params[1],
+          email: params[2],
+          profile_image: params[3],
+          psychologist_name: params[4],
+          psychologist_phone: params[5],
+          pin_enabled: params[6],
+          pin_hash: params[7],
+          login_provider: params[8],
+          google_id: null,
+          google_access_token: null,
+          google_refresh_token: null,
+          google_expires_at: null,
+        };
+      }
+      
       profiles.push(newProfile);
       this.data.set('Profile', profiles);
-      return { lastInsertRowId: params[0] };
+      return { lastInsertRowId: this.lastId };
     }
 
     if (sql.includes('INSERT INTO Diary')) {
@@ -50,6 +88,39 @@ class MockSQLiteDatabase {
       return { lastInsertRowId: this.lastId };
     }
 
+    if (sql.includes('UPDATE Profile SET')) {
+      const profiles = this.data.get('Profile') || [];
+      const id = params[params.length - 1]; // O ID é sempre o último parâmetro no UPDATE
+      const profileIndex = profiles.findIndex((profile: any) => profile.id === id);
+      
+      if (profileIndex >= 0) {
+        // Atualizar o perfil existente com os novos valores
+        const profile = profiles[profileIndex];
+        
+        // Parse simples do SQL para extrair os campos
+        const setClause = sql.match(/SET (.+) WHERE/)?.[1] || '';
+        const fields = setClause.split(', ').map(field => field.split(' = ?')[0].trim());
+        
+        fields.forEach((field, index) => {
+          if (params[index] !== undefined) {
+            profile[field] = params[index];
+          }
+        });
+        
+        profiles[profileIndex] = profile;
+        this.data.set('Profile', profiles);
+        return { changes: 1 };
+      }
+      return { changes: 0 };
+    }
+
+    if (sql.includes('DELETE FROM Profile WHERE id = ?')) {
+      const profiles = this.data.get('Profile') || [];
+      const filteredProfiles = profiles.filter((profile: any) => profile.id !== params[0]);
+      this.data.set('Profile', filteredProfiles);
+      return { changes: profiles.length - filteredProfiles.length };
+    }
+
     if (sql.includes('DELETE FROM')) {
       const tableName = sql.match(/DELETE FROM (\w+)/)?.[1];
       if (tableName) {
@@ -63,6 +134,20 @@ class MockSQLiteDatabase {
 
   getFirstSync(sql: string, params: any[] = []) {
     console.log('Mock getFirstSync:', sql, params);
+
+    if (sql.includes('SELECT * FROM Profile WHERE id = ?')) {
+      const profiles = this.data.get('Profile') || [];
+      console.log('Profiles in database:', profiles);
+      const found = profiles.find((profile: any) => profile.id === params[0]);
+      console.log('Found profile:', found);
+      return found || null;
+    }
+
+    if (sql.includes('SELECT * FROM Profile WHERE google_id = ?')) {
+      const profiles = this.data.get('Profile') || [];
+      const found = profiles.find((profile: any) => profile.google_id === params[0]);
+      return found || null;
+    }
 
     if (sql.includes('SELECT * FROM Diary WHERE id = ?')) {
       const diaries = this.data.get('Diary') || [];

@@ -36,17 +36,47 @@ jest.mock('expo-sqlite', () => ({
         if (sql.includes('INSERT INTO Profile')) {
           const profiles = mockDB.data.get('Profile') || [];
           mockDB.lastId++;
-          const newProfile = {
-            id: mockDB.lastId,
-            name: params[0],
-            phone: params[1],
-            email: params[2],
-            profile_image: params[3],
-            psychologist_name: params[4],
-            psychologist_phone: params[5],
-            pin_enabled: params[6],
-            pin_hash: params[7],
-          };
+          
+          let newProfile: any = { id: mockDB.lastId };
+          
+          if (sql.includes('google_id')) {
+            // Inserção com campos do Google
+            newProfile = {
+              id: mockDB.lastId,
+              name: params[0],
+              phone: params[1],
+              email: params[2],
+              profile_image: params[3],
+              psychologist_name: params[4],
+              psychologist_phone: params[5],
+              pin_enabled: params[6],
+              pin_hash: params[7],
+              login_provider: params[8],
+              google_id: params[9],
+              google_access_token: params[10],
+              google_refresh_token: params[11],
+              google_expires_at: params[12],
+            };
+          } else {
+            // Inserção sem campos do Google (perfil local)
+            newProfile = {
+              id: mockDB.lastId,
+              name: params[0],
+              phone: params[1],
+              email: params[2],
+              profile_image: params[3],
+              psychologist_name: params[4],
+              psychologist_phone: params[5],
+              pin_enabled: params[6],
+              pin_hash: params[7],
+              login_provider: params[8],
+              google_id: null,
+              google_access_token: null,
+              google_refresh_token: null,
+              google_expires_at: null,
+            };
+          }
+          
           profiles.push(newProfile);
           mockDB.data.set('Profile', profiles);
           return { lastInsertRowId: mockDB.lastId };
@@ -88,30 +118,15 @@ jest.mock('expo-sqlite', () => ({
           if (profileIndex >= 0) {
             const profile = profiles[profileIndex];
 
-            // Parse simples da query UPDATE para atualizar os campos
-            if (sql.includes('name = ?')) {
-              const nameIndex = sql.indexOf('name = ?');
-              const commasBefore = (
-                sql.substring(0, nameIndex).match(/\?/g) || []
-              ).length;
-              profile.name = params[commasBefore];
-            }
+            // Parse simples do SQL para extrair os campos
+            const setClause = sql.match(/SET (.+) WHERE/)?.[1] || '';
+            const fields = setClause.split(', ').map(field => field.split(' = ?')[0].trim());
 
-            if (sql.includes('email = ?')) {
-              const emailIndex = sql.indexOf('email = ?');
-              const commasBefore = (
-                sql.substring(0, emailIndex).match(/\?/g) || []
-              ).length;
-              profile.email = params[commasBefore];
-            }
-
-            if (sql.includes('phone = ?')) {
-              const phoneIndex = sql.indexOf('phone = ?');
-              const commasBefore = (
-                sql.substring(0, phoneIndex).match(/\?/g) || []
-              ).length;
-              profile.phone = params[commasBefore];
-            }
+            fields.forEach((field, index) => {
+              if (params[index] !== undefined) {
+                profile[field] = params[index];
+              }
+            });
 
             profiles[profileIndex] = profile;
             mockDB.data.set('Profile', profiles);
@@ -134,6 +149,14 @@ jest.mock('expo-sqlite', () => ({
           const profiles = mockDB.data.get('Profile') || [];
           const found = profiles.find(
             (profile: any) => profile.id === params[0]
+          );
+          return found || null;
+        }
+
+        if (sql.includes('SELECT * FROM Profile WHERE google_id = ?')) {
+          const profiles = mockDB.data.get('Profile') || [];
+          const found = profiles.find(
+            (profile: any) => profile.google_id === params[0]
           );
           return found || null;
         }
