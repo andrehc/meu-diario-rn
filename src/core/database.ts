@@ -1,6 +1,6 @@
-import * as SQLite from 'expo-sqlite';
+import { Platform } from 'react-native';
 
-let db: SQLite.SQLiteDatabase;
+let db: any;
 
 // Função para inicializar o banco com nome customizado
 export const initDB = (dbName: string = 'diary.db') => {
@@ -13,8 +13,16 @@ export const initDB = (dbName: string = 'diary.db') => {
     }
   }
 
-  // Abre o novo banco
-  db = SQLite.openDatabaseSync(dbName);
+  // Importação condicional baseada na plataforma
+  if (Platform.OS === 'web') {
+    // Usa mock para web
+    const { openDatabaseSync } = require('./database.web');
+    db = openDatabaseSync(dbName);
+  } else {
+    // Usa implementação nativa para mobile
+    const { openDatabaseSync } = require('./database.native');
+    db = openDatabaseSync(dbName);
+  }
 
   // Cria as tabelas
   try {
@@ -39,7 +47,7 @@ export const initDB = (dbName: string = 'diary.db') => {
 
     db.execSync(
       `CREATE TABLE IF NOT EXISTS Diary (
-                id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 profile_id INTEGER NOT NULL,
                 title TEXT NOT NULL,
                 event TEXT,             --1 o_que_aconteceu
@@ -79,8 +87,14 @@ export const initTestDB = () => {
     }
   }
 
-  // Abre o novo banco
-  db = SQLite.openDatabaseSync(testDbName);
+  // Importação condicional para testes
+  if (Platform.OS === 'web') {
+    const { openDatabaseSync } = require('./database.web');
+    db = openDatabaseSync('test_memory');
+  } else {
+    const { openDatabaseSync } = require('./database.native');
+    db = openDatabaseSync(testDbName);
+  }
 
   // Remove tabelas existentes e cria novamente com estrutura atualizada
   try {
@@ -108,7 +122,7 @@ export const initTestDB = () => {
 
     db.execSync(
       `CREATE TABLE Diary (
-                id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 profile_id INTEGER NOT NULL,
                 title TEXT NOT NULL,
                 event TEXT,             --1 o_que_aconteceu
