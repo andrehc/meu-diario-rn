@@ -1,54 +1,254 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
+// GlobalStyles.ts
+import { StyleSheet } from 'react-native';
 
-import { Platform } from 'react-native';
+// Definição de tipos para os estilos globais
+export interface MoodColors {
+  happy: string;
+  veryHappy: string;
+  neutral: string;
+  sad: string;
+  angry: string;
+  fearful: string;
+  ansious: string;
+  excited: string;
+  relaxed: string;
+  bored: string;
+  other: string
+}
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+export interface Colors {
+  primary: string;
+  secondary: string;
+  background: string;
+  cardBackground: string;
+  textPrimary: string;
+  textSecondary: string;
+  textTertiary: string;
+  moodColors: MoodColors;
+}
 
+// Colors para o sistema de tema do Expo
 export const Colors = {
   light: {
     text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
+    background: '#F5F5F5',
+    tint: '#4CAF50',
     icon: '#687076',
     tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    tabIconSelected: '#4CAF50',
+    cardBackground: '#FFF',
+    textPrimary: '#000',
+    textSecondary: '#888',
+    textTertiary: '#666',
+    primary: '#4CAF50',
+    secondary: '#66BB6A',
   },
   dark: {
     text: '#ECEDEE',
     background: '#151718',
-    tint: tintColorDark,
+    tint: '#66BB6A',
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    tabIconSelected: '#66BB6A',
+    cardBackground: '#1E1E1E',
+    textPrimary: '#ECEDEE',
+    textSecondary: '#9BA1A6',
+    textTertiary: '#7A7A7A',
+    primary: '#66BB6A',
+    secondary: '#4CAF50',
   },
 };
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
+export interface Fonts {
+  regular: string;
+  bold: string;
+  sizes: {
+    xxs: number;
+    xs: number;
+    small: number;
+    medium: number;
+    large: number;
+    xl: number;
+    xxl: number;
+  };
+}
+
+export interface Spacing {
+  xs: number;
+  s: number;
+  m: number;
+  l: number;
+  xl: number;
+  xxl: number;
+}
+
+export interface Borders {
+  radius: number;
+  radiusSmall: number;
+  radiusCircle: number;
+}
+
+export interface Shadow {
+  elevation: number;
+  shadowColor: string;
+  shadowOffset: { width: number; height: number };
+  shadowOpacity: number;
+  shadowRadius: number;
+}
+
+export interface Typography {
+  h1: { fontSize: number; fontWeight: 'bold'; color: string };
+  h2: { fontSize: number; fontWeight: 'bold'; color: string };
+  body: { fontSize: number; color: string };
+  caption: { fontSize: number; color: string };
+}
+
+// Estilos globais reutilizáveis
+const GlobalStyles: {
+  colors: Colors;
+  fonts: Fonts;
+  spacing: Spacing;
+  borders: Borders;
+  shadow: Shadow;
+  typography: Typography;
+} = {
+  // Cores (usando o tema light como padrão)
+  colors: {
+    primary: Colors.light.primary,
+    secondary: Colors.light.secondary,
+    background: Colors.light.background,
+    cardBackground: Colors.light.cardBackground,
+    textPrimary: Colors.light.textPrimary,
+    textSecondary: Colors.light.textSecondary,
+    textTertiary: Colors.light.textTertiary,
+    moodColors: {
+      happy: '#4DD0E1',
+      veryHappy: '#66BB6A',
+      neutral: '#FFEB3B',
+      sad: '#FFB6B6',
+      fearful: '#FF8A80',
+      ansious: '#FFCC80',
+      excited: '#BA68C8',
+      relaxed: '#81C784',
+      bored: '#90A4AE',
+      angry: '#FF5252',
+      other: '#A1887F',
+    },
   },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
+  // Fontes
+  fonts: {
+    regular: 'System',
+    bold: 'System',
+    sizes: {
+      xxs: 12,
+      xs: 14,
+      small: 16,
+      medium: 18,
+      large: 20,
+      xl: 24,
+      xxl: 28,
+    },
   },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded:
-      "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+  // Espaçamentos
+  spacing: {
+    xs: 5,
+    s: 10,
+    m: 15,
+    l: 20,
+    xl: 25,
+    xxl: 30,
+  },
+  // Bordas e cantos
+  borders: {
+    radius: 12,
+    radiusSmall: 10,
+    radiusCircle: 50,
+  },
+  // Sombras
+  shadow: {
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  // Tipografia
+  typography: {
+    h1: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: '#000',
+    },
+    h2: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#000',
+    },
+    body: {
+      fontSize: 16,
+      color: '#000',
+    },
+    caption: {
+      fontSize: 12,
+      color: '#888',
+    },
+  },
+};
+
+// Estilos comuns que podem ser usados diretamente em componentes
+export const CommonStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: GlobalStyles.colors.background,
+  },
+  card: {
+    backgroundColor: GlobalStyles.colors.cardBackground,
+    borderRadius: GlobalStyles.borders.radius,
+    padding: GlobalStyles.spacing.l,
+    marginBottom: GlobalStyles.spacing.l,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 30,
+    right: GlobalStyles.spacing.l,
+    width: 60,
+    height: 60,
+    borderRadius: GlobalStyles.borders.radiusCircle,
+    backgroundColor: GlobalStyles.colors.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...GlobalStyles.shadow,
+  },
+  fabText: {
+    fontSize: 32,
+    color: GlobalStyles.colors.cardBackground,
+    fontWeight: 'bold',
+  },
+  moodSelector: {
+    flexDirection: 'row',
+    paddingHorizontal: GlobalStyles.spacing.xs,
+    gap: GlobalStyles.spacing.s,
+  },
+  moodButton: {
+    width: 60,
+    height: 60,
+    borderRadius: GlobalStyles.borders.radiusSmall,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: GlobalStyles.colors.cardBackground,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  emoji: {
+    fontSize: 24,
   },
 });
+
+export default GlobalStyles;
