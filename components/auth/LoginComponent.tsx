@@ -1,4 +1,7 @@
 import PinVerification from '@/components/ui/PinVerification';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useAuth } from '@/src/contexts/AuthContext';
 import * as googleAuthService from '@/src/services/googleAuthService';
 import { ProfileService } from '@/src/services/profileService';
@@ -9,10 +12,8 @@ import React, { useState } from 'react';
 import {
     Alert,
     StyleSheet,
-    Text,
     TextInput,
     TouchableOpacity,
-    View,
 } from 'react-native';
 
 interface LoginFormData {
@@ -90,7 +91,7 @@ export default function LoginComponent() {
                 await login(existingUser);
                 
                 console.log('🏠 [LOGIN] Navegando para home...');
-                router.replace('/(tabs)');
+                router.replace('/');
             }
 
         } catch (error) {
@@ -119,7 +120,7 @@ export default function LoginComponent() {
             await login(result.profile);
 
             console.log('🏠 [GOOGLE] Navegando para home...');
-            router.replace('/(tabs)');
+            router.replace('/');
 
         } catch (error: any) {
             console.error('❌ [GOOGLE] Erro detalhado:', error);
@@ -143,35 +144,40 @@ export default function LoginComponent() {
             setShowPinVerification(false);
             setUserAwaitingPinVerification(null);
             console.log('🏠 [LOGIN] Navegando para home...');
-            router.replace('/(tabs)');
+            router.replace('/');
         } catch (error) {
             console.error('❌ [LOGIN] Erro ao fazer login após PIN:', error);
             Alert.alert('Erro', 'Erro ao fazer login. Tente novamente.');
         }
     };
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Entrar</Text>
-                <Text style={styles.subtitle}>Entre com sua conta existente</Text>
-            </View>
+    const backgroundColor = useThemeColor({}, 'background');
+    const textColor = useThemeColor({}, 'text');
+    const cardBackgroundColor = useThemeColor({}, 'cardBackground');
+    const iconColor = useThemeColor({}, 'icon');
 
-            <View style={styles.form}>
+    return (
+        <ThemedView style={styles.container}>
+            <ThemedView style={styles.header}>
+                <ThemedText type="title">Entrar</ThemedText>
+                <ThemedText style={styles.subtitle}>Entre com sua conta existente</ThemedText>
+            </ThemedView>
+
+            <ThemedView style={styles.form}>
                 {/* Email Input */}
-                <View style={styles.inputContainer}>
-                    <Ionicons name="mail-outline" size={20} color="#666" />
+                <ThemedView style={[styles.inputContainer, { backgroundColor: cardBackgroundColor }]}>
+                    <Ionicons name="mail-outline" size={20} color={iconColor} />
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { color: textColor }]}
                         placeholder="Seu email"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={iconColor}
                         value={formData.email}
                         onChangeText={(text) => setFormData({ ...formData, email: text })}
                         keyboardType="email-address"
                         autoCapitalize="none"
                         autoComplete="email"
                     />
-                </View>
+                </ThemedView>
 
                 {/* Login Button */}
                 <TouchableOpacity
@@ -180,17 +186,17 @@ export default function LoginComponent() {
                     disabled={isLoading}
                 >
                     <Ionicons name="log-in-outline" size={20} color="#fff" />
-                    <Text style={styles.buttonText}>
+                    <ThemedText style={styles.buttonText}>
                         {isLoading ? 'Entrando...' : 'Entrar'}
-                    </Text>
+                    </ThemedText>
                 </TouchableOpacity>
 
                 {/* Divider */}
-                <View style={styles.divider}>
-                    <View style={styles.dividerLine} />
-                    <Text style={styles.dividerText}>ou</Text>
-                    <View style={styles.dividerLine} />
-                </View>
+                <ThemedView style={styles.divider}>
+                    <ThemedView style={[styles.dividerLine, { backgroundColor: iconColor }]} />
+                    <ThemedText style={styles.dividerText}>ou</ThemedText>
+                    <ThemedView style={[styles.dividerLine, { backgroundColor: iconColor }]} />
+                </ThemedView>
 
                 {/* Google Login Button */}
                 <TouchableOpacity
@@ -199,19 +205,19 @@ export default function LoginComponent() {
                     disabled={true}
                 >
                     <Ionicons name="logo-google" size={20} color="#4285f4" />
-                    <Text style={[styles.buttonText, styles.googleButtonText]}>
+                    <ThemedText style={[styles.buttonText, styles.googleButtonText]}>
                         Continuar com Google
-                    </Text>
+                    </ThemedText>
                 </TouchableOpacity>
-            </View>
+            </ThemedView>
 
             {/* Register Link */}
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>Não tem uma conta? </Text>
+            <ThemedView style={styles.footer}>
+                <ThemedText style={styles.footerText}>Não tem uma conta? </ThemedText>
                 <TouchableOpacity onPress={() => router.push('/auth/register')}>
-                    <Text style={styles.linkText}>Registrar-se</Text>
+                    <ThemedText style={styles.linkText}>Registrar-se</ThemedText>
                 </TouchableOpacity>
-            </View>
+            </ThemedView>
             
             {/* PIN Verification Modal */}
             <PinVerification
@@ -222,7 +228,7 @@ export default function LoginComponent() {
                 title="Digite seu PIN"
                 description="Digite o PIN de 4 dígitos para acessar sua conta"
             />
-        </View>
+        </ThemedView>
     );
 }
 
@@ -236,16 +242,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 40,
     },
-    title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 8,
-    },
     subtitle: {
         fontSize: 16,
-        color: '#666',
         textAlign: 'center',
+        opacity: 0.7,
     },
     form: {
         marginBottom: 32,
@@ -253,18 +253,16 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f8f9fa',
         borderRadius: 12,
         paddingHorizontal: 16,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: '#e9ecef',
+        borderColor: 'rgba(0,0,0,0.1)',
     },
     input: {
         flex: 1,
         height: 48,
         fontSize: 16,
-        color: '#333',
         marginLeft: 12,
     },
     button: {
@@ -279,9 +277,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#4c6ef5',
     },
     googleButton: {
-        backgroundColor: '#eee',
+        backgroundColor: 'rgba(0,0,0,0.05)',
         borderWidth: 1,
-        borderColor: '#e9ecef',
+        borderColor: 'rgba(0,0,0,0.1)',
     },
     testButton: {
         backgroundColor: '#FF6B6B',
@@ -294,7 +292,7 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     googleButtonText: {
-        color: 'grey',
+        color: '#666',
     },
     divider: {
         flexDirection: 'row',
@@ -304,12 +302,11 @@ const styles = StyleSheet.create({
     dividerLine: {
         flex: 1,
         height: 1,
-        backgroundColor: '#e9ecef',
     },
     dividerText: {
         marginHorizontal: 16,
-        color: '#666',
         fontSize: 14,
+        opacity: 0.6,
     },
     footer: {
         flexDirection: 'row',
@@ -317,8 +314,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     footerText: {
-        color: '#666',
         fontSize: 14,
+        opacity: 0.7,
     },
     linkText: {
         color: '#4c6ef5',

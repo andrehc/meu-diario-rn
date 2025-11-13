@@ -1,4 +1,7 @@
 import PinToggle from '@/components/ui/PinToggle';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useAuth } from '@/src/contexts/AuthContext';
 import * as googleAuthService from '@/src/services/googleAuthService';
 import { ProfileService } from '@/src/services/profileService';
@@ -11,10 +14,8 @@ import {
     Alert,
     ScrollView,
     StyleSheet,
-    Text,
     TextInput,
     TouchableOpacity,
-    View,
 } from 'react-native';
 
 interface RegisterFormData {
@@ -120,7 +121,7 @@ export default function RegisterComponent() {
             await login(newProfile);
 
             console.log('🏠 [REGISTER] Navegando para home...');
-            router.replace('/(tabs)');
+            router.replace('/');
 
         } catch (error: any) {
             console.error('❌ [REGISTER] Erro:', error);
@@ -148,7 +149,7 @@ export default function RegisterComponent() {
             await login(result.profile);
 
             console.log('🏠 [GOOGLE REGISTER] Navegando para home...');
-            router.replace('/(tabs)');
+            router.replace('/');
 
         } catch (error: any) {
             console.error('❌ [GOOGLE REGISTER] Erro detalhado:', error);
@@ -158,50 +159,55 @@ export default function RegisterComponent() {
         }
     };
 
-    return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Criar Conta</Text>
-                <Text style={styles.subtitle}>Registre-se para começar a usar o app</Text>
-            </View>
+    const backgroundColor = useThemeColor({}, 'background');
+    const textColor = useThemeColor({}, 'text');
+    const cardBackgroundColor = useThemeColor({}, 'cardBackground');
+    const iconColor = useThemeColor({}, 'icon');
 
-            <View style={styles.form}>
+    return (
+        <ScrollView style={[styles.container, { backgroundColor }]} contentContainerStyle={styles.contentContainer}>
+            <ThemedView style={styles.header}>
+                <ThemedText type="title">Criar Conta</ThemedText>
+                <ThemedText style={styles.subtitle}>Registre-se para começar a usar o app</ThemedText>
+            </ThemedView>
+
+            <ThemedView style={styles.form}>
                 {/* Nome Input */}
-                <View style={styles.inputContainer}>
-                    <Ionicons name="person-outline" size={20} color="#666" />
+                <ThemedView style={[styles.inputContainer, { backgroundColor: cardBackgroundColor }]}>
+                    <Ionicons name="person-outline" size={20} color={iconColor} />
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { color: textColor }]}
                         placeholder="Seu nome completo"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={iconColor}
                         value={formData.name}
                         onChangeText={(text) => setFormData({ ...formData, name: text })}
                         autoCapitalize="words"
                         autoComplete="name"
                     />
-                </View>
+                </ThemedView>
 
                 {/* Email Input */}
-                <View style={styles.inputContainer}>
-                    <Ionicons name="mail-outline" size={20} color="#666" />
+                <ThemedView style={[styles.inputContainer, { backgroundColor: cardBackgroundColor }]}>
+                    <Ionicons name="mail-outline" size={20} color={iconColor} />
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { color: textColor }]}
                         placeholder="Seu email"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={iconColor}
                         value={formData.email}
                         onChangeText={(text) => setFormData({ ...formData, email: text })}
                         keyboardType="email-address"
                         autoCapitalize="none"
                         autoComplete="email"
                     />
-                </View>
+                </ThemedView>
 
                 {/* Telefone Input */}
-                <View style={styles.inputContainer}>
-                    <Ionicons name="call-outline" size={20} color="#666" />
+                <ThemedView style={[styles.inputContainer, { backgroundColor: cardBackgroundColor }]}>
+                    <Ionicons name="call-outline" size={20} color={iconColor} />
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { color: textColor }]}
                         placeholder="Seu telefone (opcional)"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={iconColor}
                         value={placeholderTelefone(formData.phone)}
                         onChangeText={(text) => {
                             const numbers = text.replace(/\D/g, '');
@@ -211,29 +217,29 @@ export default function RegisterComponent() {
                         maxLength={15}
                         autoComplete="tel"
                     />
-                </View>
+                </ThemedView>
 
                 {/* Nome Input Psicologo */}
-                <View style={styles.inputContainer}>
-                    <Ionicons name="person-outline" size={20} color="#666" />
+                <ThemedView style={[styles.inputContainer, { backgroundColor: cardBackgroundColor }]}>
+                    <Ionicons name="person-outline" size={20} color={iconColor} />
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { color: textColor }]}
                         placeholder="Nome do psicólogo (opcional)"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={iconColor}
                         value={formData.psychologist_name}
                         onChangeText={(text) => setFormData({ ...formData, psychologist_name: text })}
                         autoCapitalize="words"
                         autoComplete="name"
                     />
-                </View>
+                </ThemedView>
 
                 {/* Telefone Psicologo Input */}
-                <View style={styles.inputContainer}>
-                    <Ionicons name="call-outline" size={20} color="#666" />
+                <ThemedView style={[styles.inputContainer, { backgroundColor: cardBackgroundColor }]}>
+                    <Ionicons name="call-outline" size={20} color={iconColor} />
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { color: textColor }]}
                         placeholder="Telefone do psicólogo (opcional)"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={iconColor}
                         value={placeholderTelefone(formData.psychologist_phone)}
                         onChangeText={(text) => {
                             const numbers = text.replace(/\D/g, '');
@@ -243,7 +249,7 @@ export default function RegisterComponent() {
                         maxLength={15}
                         autoComplete="tel"
                     />
-                </View>
+                </ThemedView>
 
                 {/* PIN Toggle */}
                 <PinToggle
@@ -279,17 +285,17 @@ export default function RegisterComponent() {
                     disabled={isLoading}
                 >
                     <Ionicons name="person-add-outline" size={20} color="#fff" />
-                    <Text style={styles.buttonText}>
+                    <ThemedText style={styles.buttonText}>
                         {isLoading ? 'Registrando...' : 'Criar Conta'}
-                    </Text>
+                    </ThemedText>
                 </TouchableOpacity>
 
                 {/* Divider */}
-                <View style={styles.divider}>
-                    <View style={styles.dividerLine} />
-                    <Text style={styles.dividerText}>ou</Text>
-                    <View style={styles.dividerLine} />
-                </View>
+                <ThemedView style={styles.divider}>
+                    <ThemedView style={[styles.dividerLine, { backgroundColor: iconColor }]} />
+                    <ThemedText style={styles.dividerText}>ou</ThemedText>
+                    <ThemedView style={[styles.dividerLine, { backgroundColor: iconColor }]} />
+                </ThemedView>
 
                 {/* Google Register Button */}
                 <TouchableOpacity
@@ -299,26 +305,26 @@ export default function RegisterComponent() {
 
                 >
                     <Ionicons name="logo-google" size={20} color="#4285f4" />
-                    <Text style={[styles.buttonText, styles.googleButtonText]}>
+                    <ThemedText style={[styles.buttonText, styles.googleButtonText]}>
                         Registrar com Google
-                    </Text>
+                    </ThemedText>
                 </TouchableOpacity>
-            </View>
+            </ThemedView>
 
             {/* Login Link */}
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>Já tem uma conta? </Text>
+            <ThemedView style={styles.footer}>
+                <ThemedText style={styles.footerText}>Já tem uma conta? </ThemedText>
                 <TouchableOpacity onPress={() => router.push('/auth/login')}>
-                    <Text style={styles.linkText}>Fazer Login</Text>
+                    <ThemedText style={styles.linkText}>Fazer Login</ThemedText>
                 </TouchableOpacity>
-            </View>
+            </ThemedView>
 
             {/* Terms */}
-            <View style={styles.terms}>
-                <Text style={styles.termsText}>
+            <ThemedView style={styles.terms}>
+                <ThemedText style={styles.termsText}>
                     Ao se registrar, você concorda com nossos termos de uso e política de privacidade
-                </Text>
-            </View>
+                </ThemedText>
+            </ThemedView>
         </ScrollView>
     );
 }
@@ -336,16 +342,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 40,
     },
-    title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 8,
-    },
     subtitle: {
         fontSize: 16,
-        color: '#666',
         textAlign: 'center',
+        opacity: 0.7,
     },
     form: {
         marginBottom: 32,
@@ -353,18 +353,16 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f8f9fa',
         borderRadius: 12,
         paddingHorizontal: 16,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: '#e9ecef',
+        borderColor: 'rgba(0,0,0,0.1)',
     },
     input: {
         flex: 1,
         height: 48,
         fontSize: 16,
-        color: '#333',
         marginLeft: 12,
     },
     button: {
@@ -379,9 +377,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#28a745',
     },
     googleButton: {
-        backgroundColor: '#eee',
+        backgroundColor: 'rgba(0,0,0,0.05)',
         borderWidth: 1,
-        borderColor: '#e9ecef',
+        borderColor: 'rgba(0,0,0,0.1)',
     },
     buttonText: {
         fontSize: 16,
@@ -390,7 +388,7 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     googleButtonText: {
-        color: 'grey',
+        color: '#666',
     },
     divider: {
         flexDirection: 'row',
@@ -400,12 +398,11 @@ const styles = StyleSheet.create({
     dividerLine: {
         flex: 1,
         height: 1,
-        backgroundColor: '#e9ecef',
     },
     dividerText: {
         marginHorizontal: 16,
-        color: '#666',
         fontSize: 14,
+        opacity: 0.6,
     },
     footer: {
         flexDirection: 'row',
@@ -414,8 +411,8 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     footerText: {
-        color: '#666',
         fontSize: 14,
+        opacity: 0.7,
     },
     linkText: {
         color: '#4c6ef5',
@@ -426,9 +423,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     termsText: {
-        color: '#999',
         fontSize: 12,
         textAlign: 'center',
         lineHeight: 18,
+        opacity: 0.6,
     },
 });

@@ -188,6 +188,15 @@ class WebDatabaseMock {
 
 export const initSQLiteDB = async () => {
   try {
+    console.log('🔧 [DATABASE] Iniciando inicialização do banco...');
+    console.log('🔧 [DATABASE] Banco atual:', sqliteDatabase ? 'JÁ EXISTE' : 'NULL');
+    
+    // Se já existe, não reinicializa
+    if (sqliteDatabase) {
+      console.log('ℹ️ [DATABASE] Banco já inicializado, pulando inicialização');
+      return sqliteDatabase;
+    }
+    
     if (Platform.OS === 'web' || typeof window !== 'undefined') {
       console.log('[SQLite] Inicializando mock para web');
       sqliteDatabase = new WebDatabaseMock();

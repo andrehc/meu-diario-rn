@@ -32,24 +32,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const loadStoredUser = async () => {
     try {
+      console.log('🔄 [AUTH] Carregando usuário do storage...');
       setIsLoading(true);
       const storedUser = await AsyncStorage.getItem(STORAGE_KEY);
       
       if (storedUser) {
+        console.log('🔄 [AUTH] Usuário encontrado no storage');
         const userData = JSON.parse(storedUser);
+        console.log('🔄 [AUTH] Dados do storage:', { id: userData.id, name: userData.name, email: userData.email });
         
         // Busca dados atualizados do banco de dados
+        console.log('🔄 [AUTH] Buscando dados atualizados no banco...');
         const currentUser = await ProfileService.getProfile(userData.id);
         
         if (currentUser) {
+          console.log('✅ [AUTH] Usuário encontrado no banco:', { id: currentUser.id, name: currentUser.name, email: currentUser.email });
           setUser(currentUser);
         } else {
+          console.log('❌ [AUTH] Usuário não encontrado no banco, removendo do storage');
           // Usuário não existe mais no banco, remove do storage
           await AsyncStorage.removeItem(STORAGE_KEY);
         }
+      } else {
+        console.log('ℹ️ [AUTH] Nenhum usuário no storage');
       }
     } catch (error) {
-      console.error('Erro ao carregar usuário:', error);
+      console.error('❌ [AUTH] Erro ao carregar usuário:', error);
       await AsyncStorage.removeItem(STORAGE_KEY);
     } finally {
       setIsLoading(false);
@@ -68,15 +76,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = async () => {
     try {
+      console.log('🚪 [LOGOUT] Iniciando logout...');
+      console.log('🚪 [LOGOUT] Usuário atual:', user?.name, user?.email);
+      
       // Se for usuário Google, faz logout do Google também
       if (user?.login_provider === 'google') {
+        console.log('🚪 [LOGOUT] Fazendo logout do Google...');
         await googleAuthService.signOut();
       }
       
+      console.log('🚪 [LOGOUT] Removendo usuário do estado...');
       setUser(null);
+      
+      console.log('🚪 [LOGOUT] Removendo dados do AsyncStorage...');
       await AsyncStorage.removeItem(STORAGE_KEY);
+      
+      console.log('✅ [LOGOUT] Logout concluído com sucesso');
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      console.error('❌ [LOGOUT] Erro ao fazer logout:', error);
       throw error;
     }
   };
