@@ -80,6 +80,16 @@ export default function RegisterComponent() {
                 return;
             }
 
+            // Validação do PIN: só habilita se tiver hash válido
+            const shouldEnablePin = formData.pin_enabled && formData.pin_hash.length > 0;
+            
+            console.log('🔐 [REGISTER] Estado do PIN:', {
+                pin_enabled_form: formData.pin_enabled,
+                pin_hash_exists: !!formData.pin_hash,
+                pin_hash_length: formData.pin_hash.length,
+                final_pin_enabled: shouldEnablePin
+            });
+
             // Cria perfil local
             const localProfileData: CreateLocalProfileData = {
                 name: formData.name.trim(),
@@ -88,8 +98,8 @@ export default function RegisterComponent() {
                 profile_image: '',
                 psychologist_name: formData.psychologist_name.trim(),
                 psychologist_phone: formData.psychologist_phone.trim(),
-                pin_enabled: formData.pin_enabled ? 1 : 0,
-                pin_hash: formData.pin_hash,
+                pin_enabled: shouldEnablePin ? 1 : 0, // ✅ Só 1 se tiver hash válido
+                pin_hash: shouldEnablePin ? formData.pin_hash : '', // ✅ Limpa hash se não habilitado
                 login_provider: 'local',
             };
 
@@ -238,10 +248,25 @@ export default function RegisterComponent() {
                 {/* PIN Toggle */}
                 <PinToggle
                     value={formData.pin_enabled}
-                    onToggle={(enabled) => setFormData({ ...formData, pin_enabled: enabled })}
+                    onToggle={(enabled) => {
+                        if (!enabled) {
+                            // Se desabilitar, limpa o hash
+                            setFormData({ 
+                                ...formData, 
+                                pin_enabled: enabled,
+                                pin_hash: '' 
+                            });
+                        } else {
+                            setFormData({ ...formData, pin_enabled: enabled });
+                        }
+                    }}
                     onPinSet={async (pin) => {
                         const hashedPin = await hashPin(pin);
-                        setFormData({ ...formData, pin_hash: hashedPin });
+                        setFormData({ 
+                            ...formData, 
+                            pin_hash: hashedPin,
+                            pin_enabled: true // ✅ Garante que fica habilitado quando PIN é definido
+                        });
                     }}
                     title="Ativar PIN de Segurança"
                     description="Habilita um Código PIN de 4 dígitos"

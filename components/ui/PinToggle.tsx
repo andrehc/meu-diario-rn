@@ -230,7 +230,7 @@ export default function PinToggle({
         {value && (
           <View style={styles.activePinInfo}>
             <Ionicons name="shield-checkmark" size={16} color="#28a745" />
-            <Text style={styles.activePinText}>PIN ativo - Seus dados estão protegidos</Text>
+            <Text style={styles.activePinText}>PIN ativo - Dados protegidos</Text>
           </View>
         )}
       </View>

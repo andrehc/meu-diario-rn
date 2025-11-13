@@ -1,5 +1,6 @@
 import * as googleAuthService from '@/src/services/googleAuthService';
-import { ProfileService, type Profile } from '@/src/services/profileService';
+import { ProfileService } from '@/src/services/profileService';
+import { type Profile } from '@/src/types/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 

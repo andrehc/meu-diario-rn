@@ -218,9 +218,9 @@ export const initSQLiteDB = async () => {
       );
     `);
 
-    sqliteDatabase.execSync(`
-      CREATE TABLE IF NOT EXISTS Diary (
-        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    sqliteDatabase.execSync(
+      `CREATE TABLE IF NOT EXISTS Diary (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,  // ✅ Removido AUTO_INCREMENT
         profile_id INTEGER NOT NULL,
         title TEXT NOT NULL,
         event TEXT,
@@ -230,9 +230,10 @@ export const initSQLiteDB = async () => {
         reactions TEXT,
         alternative TEXT,
         current_mood TEXT,
-        created_at REAL NOT NULL DEFAULT (strftime('%s', 'now'))
-      );
-    `);
+        created_at REAL NOT NULL DEFAULT (strftime('%s', 'now')),
+        FOREIGN KEY (profile_id) REFERENCES Profile (id) ON DELETE CASCADE
+      );`
+    );
     
     console.log('✅ SQLite DB inicializado com sucesso');
     return sqliteDatabase;
