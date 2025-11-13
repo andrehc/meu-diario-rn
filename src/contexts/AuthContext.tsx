@@ -1,6 +1,5 @@
 import * as googleAuthService from '@/src/services/googleAuthService';
-import * as profileService from '@/src/services/profileService';
-import { Profile } from '@/src/services/profileService';
+import { ProfileService, type Profile } from '@/src/services/profileService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
@@ -39,7 +38,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const userData = JSON.parse(storedUser);
         
         // Busca dados atualizados do banco de dados
-        const currentUser = await profileService.getProfile(userData.id);
+        const currentUser = await ProfileService.getProfile(userData.id);
         
         if (currentUser) {
           setUser(currentUser);
@@ -85,10 +84,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!user) return;
 
     try {
-      const changes = await profileService.updateProfile(user.id, updates);
+      const success = await ProfileService.updateProfile(user.id, updates);
       
-      if (changes > 0) {
-        const updatedUser = await profileService.getProfile(user.id);
+      if (success) {
+        const updatedUser = await ProfileService.getProfile(user.id);
         if (updatedUser) {
           setUser(updatedUser);
           await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
@@ -129,7 +128,7 @@ export function useGoogleTokenStatus() {
   const { user } = useAuth();
   
   const isGoogleUser = user?.login_provider === 'google';
-  const isTokenExpired = user ? profileService.isGoogleTokenExpired(user) : false;
+  const isTokenExpired = user ? ProfileService.isGoogleTokenExpired(user) : false;
   
   return {
     isGoogleUser,
