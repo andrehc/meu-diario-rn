@@ -3,6 +3,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import BottomNavigation from '@/components/ui/BottomNavigation';
+import StatusBarBackground from '@/components/ui/StatusBarBackground';
 import GlobalStyles, { CommonStyles } from '@/constants/theme';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -37,8 +39,10 @@ export default function HomeScreen() {
   console.log('🏠 [INDEX] Dados do usuário:', user);
 
   return (
-    <SafeAreaView style={CommonStyles.container}>
-      <View style={styles.header}>
+    <>
+      <StatusBarBackground />
+      <SafeAreaView style={CommonStyles.container}>
+        <View style={styles.header}>
         <View style={styles.logoContainer}>
           <View style={styles.logoDot} />
           <Text style={styles.logoText}>diary</Text>
@@ -91,9 +95,9 @@ export default function HomeScreen() {
 
         {/* Recently Added Section */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recently added</Text>
+          <Text style={styles.sectionTitle}>Recém adicionado</Text>
           <TouchableOpacity>
-            <Text style={styles.viewAll}>View All</Text>
+            <Text style={styles.viewAll}>Ver tudo</Text>
           </TouchableOpacity>
         </View>
 
@@ -111,16 +115,17 @@ export default function HomeScreen() {
           </View>
           <Text style={styles.entryTitle}>First day in work</Text>
           <Text style={styles.entryContent}>
-            Vivamus ornare metus ut interdum mollis. Donec hendrerit elit at faucibus
+            TODO: buscar o ultimo registro do diario;
+            titulo, data, humor e conteúdo
+
           </Text>
         </View>
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <TouchableOpacity style={CommonStyles.fab}>
-        <Text style={CommonStyles.fabText}>+</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
+        {/* Bottom Navigation with Centered Add Button */}
+        <BottomNavigation currentScreen="home" />
+      </SafeAreaView>
+    </>
   );
 }
 
@@ -254,18 +259,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 71, 87, 0.1)',
     borderWidth: 1,
     borderColor: 'rgba(255, 71, 87, 0.3)',
-  },
-  debugInfo: {
-    backgroundColor: '#e3f2fd',
-    padding: 12,
-    margin: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#2196f3',
-  },
-  debugText: {
-    fontSize: 12,
-    color: '#1976d2',
-    fontFamily: 'monospace',
   },
 });

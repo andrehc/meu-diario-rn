@@ -25,23 +25,25 @@ export interface Colors {
   textSecondary: string;
   textTertiary: string;
   moodColors: MoodColors;
+  baseColor?: string;
 }
 
 // Colors para o sistema de tema do Expo
 export const Colors = {
   light: {
     text: '#11181C',
-    background: '#F5F5F5',
+    background: '#EEE4CE',
     tint: '#4CAF50',
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: '#4CAF50',
-    cardBackground: '#FFF',
+    cardBackground: '#E6E3D9',
     textPrimary: '#000',
     textSecondary: '#888',
     textTertiary: '#666',
     primary: '#4CAF50',
     secondary: '#66BB6A',
+    baseColor: '#934730',
   },
   dark: {
     text: '#ECEDEE',
@@ -56,6 +58,7 @@ export const Colors = {
     textTertiary: '#7A7A7A',
     primary: '#66BB6A',
     secondary: '#4CAF50',
+    baseColor: '#934730',
   },
 };
 
@@ -210,7 +213,7 @@ export const CommonStyles = StyleSheet.create({
   fab: {
     position: 'absolute',
     bottom: 30,
-    right: GlobalStyles.spacing.l,
+    // right: GlobalStyles.spacing.l,
     width: 60,
     height: 60,
     borderRadius: GlobalStyles.borders.radiusCircle,
