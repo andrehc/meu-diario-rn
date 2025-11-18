@@ -38,37 +38,6 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={CommonStyles.container}>
-      {/* Debug User Info - Temporário para verificar dados */}
-      {user ? (
-        <View style={styles.debugInfo}>
-          <Text style={styles.debugText}>
-            ✅ USUÁRIO LOGADO
-          </Text>
-          <Text style={styles.debugText}>
-            👤 Nome: {user.name || 'N/A'}
-          </Text>
-          <Text style={styles.debugText}>
-            📧 Email: {user.email || 'N/A'}
-          </Text>
-          <Text style={styles.debugText}>
-            🔑 ID: {user.id || 'N/A'}
-          </Text>
-          <Text style={styles.debugText}>
-            📱 Provider: {user.login_provider || 'N/A'}
-          </Text>
-          <Text style={styles.debugText}>
-            🔐 PIN: {user.pin_enabled ? 'Ativado' : 'Desativado'}
-          </Text>
-        </View>
-      ) : (
-        <View style={[styles.debugInfo, { backgroundColor: '#ffebee', borderColor: '#f44336' }]}>
-          <Text style={[styles.debugText, { color: '#c62828' }]}>
-            ❌ NENHUM USUÁRIO LOGADO
-          </Text>
-        </View>
-      )}
-
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <View style={styles.logoDot} />
