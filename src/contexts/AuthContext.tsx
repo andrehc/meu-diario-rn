@@ -154,3 +154,6 @@ export function useGoogleTokenStatus() {
     needsTokenRefresh: isGoogleUser && isTokenExpired,
   };
 }
+
+// Export do AuthContext para uso direto se necessário
+export { AuthContext };

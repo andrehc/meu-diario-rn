@@ -1,10 +1,17 @@
-import LoginComponent from '@/components/auth/LoginComponent';
-import { ThemedView } from '@/components/themed-view';
+import React from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LoginForm, StatusBarBackground } from '../../src/components';
+import { useTheme } from '../../src/hooks';
 
-export default function Login() {
+export default function LoginScreen() {
+  const { colors } = useTheme();
+  
   return (
-    <ThemedView style={{ flex: 1 }}>
-      <LoginComponent />
-    </ThemedView>
+    <>
+      <StatusBarBackground />
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+        <LoginForm />
+      </SafeAreaView>
+    </>
   );
 }

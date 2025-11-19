@@ -1,0 +1,1 @@
+export { hashPin, comparePin } from './pinService';
