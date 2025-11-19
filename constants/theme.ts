@@ -44,21 +44,47 @@ export const Colors = {
     primary: '#4CAF50',
     secondary: '#66BB6A',
     baseColor: '#934730',
+    moodColors: {
+      happy: '#4DD0E1',
+      veryHappy: '#66BB6A',
+      neutral: '#FFEB3B',
+      sad: '#FFB6B6',
+      fearful: '#FF8A80',
+      ansious: '#FFCC80',
+      excited: '#BA68C8',
+      relaxed: '#81C784',
+      bored: '#90A4AE',
+      angry: '#FF5252',
+      other: '#A1887F',
+    },
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: '#66BB6A',
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: '#66BB6A',
-    cardBackground: '#1E1E1E',
-    textPrimary: '#ECEDEE',
-    textSecondary: '#9BA1A6',
-    textTertiary: '#7A7A7A',
-    primary: '#66BB6A',
-    secondary: '#4CAF50',
-    baseColor: '#934730',
+    text: '#f8f8f2',           // Dracula foreground
+    background: '#282a36',      // Dracula background
+    tint: '#bd93f9',           // Dracula purple
+    icon: '#6272a4',           // Dracula comment
+    tabIconDefault: '#6272a4', // Dracula comment
+    tabIconSelected: '#bd93f9', // Dracula purple
+    cardBackground: '#44475a',  // Dracula current line
+    textPrimary: '#f8f8f2',    // Dracula foreground
+    textSecondary: '#a6accd',  // Lighter variant
+    textTertiary: '#6272a4',   // Dracula comment
+    primary: '#bd93f9',        // Dracula purple
+    secondary: '#ff79c6',      // Dracula pink
+    baseColor: '#1a1b26',      // Dark variant for navigation
+    moodColors: {
+      happy: '#50fa7b',        // Dracula green
+      veryHappy: '#f1fa8c',    // Dracula yellow
+      neutral: '#8be9fd',      // Dracula cyan
+      sad: '#6272a4',          // Dracula comment
+      fearful: '#ffb86c',      // Dracula orange
+      ansious: '#ff79c6',      // Dracula pink
+      excited: '#bd93f9',      // Dracula purple
+      relaxed: '#50fa7b',      // Dracula green
+      bored: '#6272a4',        // Dracula comment
+      angry: '#ff5555',        // Dracula red
+      other: '#f8f8f2',        // Dracula foreground
+    },
   },
 };
 

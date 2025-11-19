@@ -28,7 +28,7 @@ export default function StatusBarBackground({
             backgroundColor,
             height: insets.top || (Platform.OS === 'android' ? StatusBar.currentHeight : 0)
           }
-        ]} 
+        ]}
       />
     </>
   );

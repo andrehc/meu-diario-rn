@@ -1,4 +1,4 @@
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -7,34 +7,12 @@ import BottomNavigation from '@/components/ui/BottomNavigation';
 import StatusBarBackground from '@/components/ui/StatusBarBackground';
 import GlobalStyles, { CommonStyles } from '@/constants/theme';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { useLogout } from '@/hooks/useLogout';
 import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
-  const { user, logout } = useAuth();
-  const router = useRouter();
-
-  const handleLogout = () => {
-    Alert.alert(
-      'Sair',
-      'Deseja realmente sair do aplicativo?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Sair',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-              router.replace('/auth/login');
-            } catch (error) {
-              Alert.alert('Erro', 'Não foi possível fazer logout');
-            }
-          },
-        },
-      ]
-    );
-  };
+  const { user } = useAuth();
+  const { handleLogout } = useLogout();
 
   console.log('🏠 [INDEX] Dados do usuário:', user);
 

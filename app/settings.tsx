@@ -6,6 +6,7 @@ import { ThemedView } from '@/components/themed-view';
 import BottomNavigation from '@/components/ui/BottomNavigation';
 import GlobalStyles, { CommonStyles } from '@/constants/theme';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { useLogout } from '@/hooks/useLogout';
 import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -52,6 +53,16 @@ const settingsData: Section[] = [
 
 // Componente principal
 const SettingsScreen = () => {
+    const { handleLogout } = useLogout();
+
+    const handleSettingPress = (title: string) => {
+        if (title === 'Logout') {
+            handleLogout();
+        } else {
+            Alert.alert(title, 'Funcionalidade em desenvolvimento');
+        }
+    };
+
     return (
         <>
             <StatusBarBackground />
@@ -64,6 +75,7 @@ const SettingsScreen = () => {
                             <TouchableOpacity
                                 key={itemIndex}
                                 style={[styles.settingItem, itemIndex !== 0 && styles.settingItemDivider]}
+                                onPress={() => handleSettingPress(item.title)}
                             >
                                 <Text style={styles.settingText}>{item.title}</Text>
                                 <Ionicons name={item.icon as any} size={24} color={GlobalStyles.colors.primary} />
