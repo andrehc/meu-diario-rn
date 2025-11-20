@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useThemeColor } from '@/src/hooks';
 import { useAuth } from '@/src/contexts';
-import { ThemedText, ThemedView, PinToggle } from '@/src/components';
+import { ThemedText, ThemedView, PinToggle, PinVerification } from '../../../src/components';
 import * as googleAuthService from '@/src/services/googleAuthService';
 import { ProfileService } from '@/src/services/profileService';
 import { type CreateLocalProfileData } from '@/src/types/database';
@@ -39,6 +39,50 @@ export function RegisterForm() {
     pin_enabled: false,
     pin_hash: '',
   });
+  
+  // Estados para controlar o PinVerification
+  const [showPinVerification, setShowPinVerification] = useState(false);
+  const [pinStep, setPinStep] = useState<'create' | 'confirm'>('create');
+  const [tempPin, setTempPin] = useState('');
+
+  // Função para cancelar criação de PIN
+  const handlePinCancel = () => {
+    setShowPinVerification(false);
+    setPinStep('create');
+    setTempPin('');
+    // Desabilita o toggle também
+    setFormData({ ...formData, pin_enabled: false, pin_hash: '' });
+  };
+
+  // Função para sucesso na criação/confirmação do PIN
+  const handlePinSuccess = async (pin?: string) => {
+    if (!pin) return;
+    if (pinStep === 'create') {
+      // Primeiro passo: armazena temporariamente e pede confirmação
+      setTempPin(pin);
+      setPinStep('confirm');
+    } else {
+      // Segundo passo: confirma se o PIN é igual
+      if (pin === tempPin) {
+        // PINs coincidem, gera o hash e salva
+        const hashedPin = await hashPin(pin);
+        setFormData({ 
+          ...formData, 
+          pin_hash: hashedPin,
+          pin_enabled: true
+        });
+        setShowPinVerification(false);
+        setPinStep('create');
+        setTempPin('');
+        Alert.alert('Sucesso', 'PIN criado com sucesso!');
+      } else {
+        // PINs diferentes, volta para o primeiro passo
+        Alert.alert('Erro', 'PINs não coincidem. Tente novamente.');
+        setPinStep('create');
+        setTempPin('');
+      }
+    }
+  };
 
   // Registro local
   const handleLocalRegister = async () => {
@@ -255,16 +299,11 @@ export function RegisterForm() {
                 pin_hash: '' 
               });
             } else {
-              setFormData({ ...formData, pin_enabled: enabled });
+              // Se habilitar, mostra o PinVerification para criar o PIN
+              setShowPinVerification(true);
+              setPinStep('create');
+              setTempPin('');
             }
-          }}
-          onPinSet={async (pin: string) => {
-            const hashedPin = await hashPin(pin);
-            setFormData({ 
-              ...formData, 
-              pin_hash: hashedPin,
-              pin_enabled: true
-            });
           }}
           title="Ativar PIN de Segurança"
           description="Habilita um Código PIN de 4 dígitos"
@@ -316,6 +355,16 @@ export function RegisterForm() {
           Ao se registrar, você concorda com nossos termos de uso e política de privacidade
         </ThemedText>
       </ThemedView>
+
+      {/* Modal de Criação de PIN */}
+      <PinVerification
+        visible={showPinVerification}
+        mode={pinStep === 'create' ? 'create' : 'confirm'}
+        title={pinStep === 'create' ? 'Criar PIN de Segurança' : 'Confirmar PIN'}
+        description={pinStep === 'create' ? 'Digite um PIN de 4 dígitos' : 'Digite o PIN novamente para confirmar'}
+        onCancel={handlePinCancel}
+        onSuccess={handlePinSuccess}
+      />
     </ScrollView>
   );
 }

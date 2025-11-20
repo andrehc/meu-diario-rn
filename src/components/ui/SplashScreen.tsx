@@ -32,7 +32,7 @@ export function SplashScreen() {
             variant="h1" 
             style={[styles.logoText, { color: colors.text.inverse }]}
           >
-            diary
+            Diario.io
           </ThemedText>
         </View>
         

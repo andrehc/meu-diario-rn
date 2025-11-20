@@ -1,5 +1,6 @@
-import { comparePin } from '@/src/utils/pinService';
+import { comparePin } from '../../utils/pinService';
 import { Ionicons } from '@expo/vector-icons';
+import { useThemeColor } from '../../hooks/useTheme';
 import React, { useEffect, useRef, useState } from 'react';
 import {
     Animated,
@@ -15,8 +16,9 @@ const { width, height } = Dimensions.get('window');
 
 interface PinVerificationProps {
   visible: boolean;
-  storedPinHash: string;
-  onSuccess: () => void;
+  storedPinHash?: string;
+  mode?: 'create' | 'confirm' | 'verify';
+  onSuccess: (pin?: string) => void;
   onCancel: () => void;
   title?: string;
   description?: string;
@@ -25,6 +27,7 @@ interface PinVerificationProps {
 export function PinVerification({ 
   visible, 
   storedPinHash,
+  mode = 'verify',
   onSuccess, 
   onCancel, 
   title = "Digite seu PIN",
@@ -36,6 +39,15 @@ export function PinVerification({
   
   const slideAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
+
+  const backgroundColor = useThemeColor({}, 'background');
+  const surfaceColor = useThemeColor({}, 'surface');
+  const textPrimary = useThemeColor({}, 'text');
+  const textSecondary = useThemeColor({}, 'textSecondary');
+  const primaryColor = useThemeColor({}, 'primary');
+  const errorColor = useThemeColor({}, 'error');
+  const borderColor = useThemeColor({}, 'textSecondary'); // Usando textSecondary como border
+  const cardBackground = useThemeColor({}, 'cardBackground');
 
   // Animar entrada do modal
   useEffect(() => {
@@ -69,24 +81,34 @@ export function PinVerification({
       
       if (newPin.length === 4) {
         setIsVerifying(true);
+        
         try {
-          const isValid = await comparePin(newPin, storedPinHash);
-          
-          if (isValid) {
+          if (mode === 'verify' && storedPinHash) {
+            // Modo verificação: compara com hash armazenado
+            const isValid = await comparePin(newPin, storedPinHash);
+            
+            if (isValid) {
+              setTimeout(() => {
+                onSuccess();
+                setPin('');
+              }, 200);
+            } else {
+              setError('PIN incorreto');
+              setTimeout(() => {
+                setPin('');
+                setError('');
+              }, 1500);
+            }
+          } else {
+            // Modos create/confirm: retorna o PIN digitado
             setTimeout(() => {
-              onSuccess();
+              onSuccess(newPin);
               setPin('');
             }, 200);
-          } else {
-            setError('PIN incorreto');
-            setTimeout(() => {
-              setPin('');
-              setError('');
-            }, 1500);
           }
         } catch (error) {
-          console.error('Erro ao verificar PIN:', error);
-          setError('Erro ao verificar PIN');
+          console.error('Erro ao processar PIN:', error);
+          setError('Erro ao processar PIN');
           setTimeout(() => {
             setPin('');
             setError('');
@@ -111,8 +133,9 @@ export function PinVerification({
             key={index} 
             style={[
               styles.dot,
-              index < pin.length && styles.dotFilled,
-              error && styles.dotError
+              {backgroundColor: index < pin.length ? primaryColor : 'transparent',
+                borderColor: error ? errorColor : (index < pin.length ? primaryColor : borderColor)
+              }
             ]} 
           />
         ))}
@@ -134,11 +157,18 @@ export function PinVerification({
             return (
               <TouchableOpacity
                 key={index}
-                style={[styles.keyButton, styles.backspaceButton]}
+                style={[
+                  styles.keyButton, 
+                  styles.backspaceButton,
+                  { 
+                    backgroundColor: surfaceColor,
+                    borderColor: borderColor 
+                  }
+                ]}
                 onPress={handleBackspace}
                 disabled={isVerifying}
               >
-                <Ionicons name="backspace-outline" size={24} color="#666" />
+                <Ionicons name="backspace-outline" size={24} color={textSecondary}/>
               </TouchableOpacity>
             );
           }
@@ -146,11 +176,17 @@ export function PinVerification({
           return (
             <TouchableOpacity
               key={index}
-              style={styles.keyButton}
+              style={[
+                styles.keyButton,
+                { 
+                  backgroundColor: cardBackground,
+                  borderColor: borderColor 
+                }
+              ]}
               onPress={() => handlePinInput(num)}
               disabled={isVerifying}
             >
-              <Text style={styles.keyText}>{num}</Text>
+              <Text style={[styles.keyText, { color: textPrimary }]}>{num}</Text>
             </TouchableOpacity>
           );
         })}
@@ -170,6 +206,7 @@ export function PinVerification({
           style={[
             styles.modalContainer,
             {
+              backgroundColor: surfaceColor,
               transform: [
                 {
                   translateY: slideAnim.interpolate({
@@ -183,15 +220,15 @@ export function PinVerification({
           ]}
         >
           {/* Header */}
-          <View style={styles.modalHeader}>
+          <View style={[styles.modalHeader, { borderBottomColor: borderColor }]}>
             <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
-              <Ionicons name="close" size={24} color="#666" />
+              <Ionicons name="close" size={24} color={textSecondary} />
             </TouchableOpacity>
             
             <View style={styles.headerContent}>
-              <Ionicons name="lock-closed" size={32} color="#4c6ef5" />
-              <Text style={styles.modalTitle}>{title}</Text>
-              <Text style={styles.modalSubtitle}>{description}</Text>
+              <Ionicons name="lock-closed" size={32} color={primaryColor} />
+              <Text style={[styles.modalTitle, { color: textPrimary }]}>{title}</Text>
+              <Text style={[styles.modalSubtitle, { color: textSecondary }]}>{description}</Text>
             </View>
           </View>
 
@@ -200,9 +237,9 @@ export function PinVerification({
             {renderPinDots()}
             
             {error ? (
-              <Text style={styles.errorText}>{error}</Text>
+              <Text style={[styles.errorText, { color: errorColor }]}>{error}</Text>
             ) : isVerifying ? (
-              <Text style={styles.verifyingText}>Verificando...</Text>
+              <Text style={[styles.verifyingText, { color: primaryColor }]}>Verificando...</Text>
             ) : null}
           </View>
 
@@ -221,7 +258,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContainer: {
-    backgroundColor: '#fff',
     height: height * 0.85,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -232,7 +268,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 30,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   cancelButton: {
     position: 'absolute',
@@ -247,13 +282,11 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 12,
     marginBottom: 8,
   },
   modalSubtitle: {
     fontSize: 16,
-    color: '#666',
     textAlign: 'center',
   },
   pinsContainer: {
@@ -269,27 +302,15 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#e9ecef',
     marginHorizontal: 8,
     borderWidth: 2,
-    borderColor: '#dee2e6',
-  },
-  dotFilled: {
-    backgroundColor: '#4c6ef5',
-    borderColor: '#4c6ef5',
-  },
-  dotError: {
-    backgroundColor: '#dc3545',
-    borderColor: '#dc3545',
   },
   errorText: {
-    color: '#dc3545',
     fontSize: 14,
     fontWeight: '500',
     textAlign: 'center',
   },
   verifyingText: {
-    color: '#4c6ef5',
     fontSize: 14,
     fontWeight: '500',
     textAlign: 'center',
@@ -308,20 +329,15 @@ const styles = StyleSheet.create({
     height: 60,
     margin: 10,
     borderRadius: 30,
-    backgroundColor: '#f8f9fa',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e9ecef',
   },
   backspaceButton: {
-    backgroundColor: '#fff3cd',
-    borderColor: '#ffeaa7',
   },
   keyText: {
     fontSize: 24,
     fontWeight: '600',
-    color: '#333',
   },
 });
 

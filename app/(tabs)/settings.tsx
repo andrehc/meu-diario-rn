@@ -6,17 +6,25 @@ import { useRouter } from 'expo-router';
 import { 
   ThemedText, 
   ThemedView, 
-  BottomNavigation, 
   StatusBarBackground 
-} from '../src/components';
-import { useTheme } from '../src/hooks';
-import { useAuth, useLogout } from '../src/hooks';
+} from '../../src/components';
+import { useTheme } from '../../src/hooks';
+import { useAuth, useLogout } from '../../src/hooks';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { handleLogout } = useLogout();
   const { colors } = useTheme();
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      // Fallback: vai para a tab home
+      router.replace('/');
+    }
+  };
 
   const settingsOptions = [
     {
@@ -62,14 +70,18 @@ export default function SettingsScreen() {
       <StatusBarBackground />
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.header, { backgroundColor: colors.surface }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
           </TouchableOpacity>
           <ThemedText variant="h2">Configurações</ThemedText>
           <View style={styles.placeholder} />
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={styles.content} 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           {/* User Profile Section */}
           <ThemedView variant="card" style={styles.profileCard}>
             <View style={styles.profileHeader}>
@@ -120,8 +132,6 @@ export default function SettingsScreen() {
             <ThemedText style={styles.logoutText}>Sair da conta</ThemedText>
           </TouchableOpacity>
         </ScrollView>
-
-        <BottomNavigation currentScreen="settings" />
       </SafeAreaView>
     </>
   );
@@ -148,6 +158,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 16,
+  },
+  scrollContent: {
+    paddingBottom: 160, // Espaço para o BottomNavigation + FAB
   },
   profileCard: {
     padding: 20,
@@ -197,7 +210,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: 20, // Mantém a margem
   },
   logoutText: {
     color: '#fff',
