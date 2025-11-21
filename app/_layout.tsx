@@ -8,8 +8,10 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '../src/hooks';
 import { AuthProvider } from '../src/contexts/AuthContext';
+import { DebugProvider } from '../src/contexts/DebugContext';
+import { DiaryProvider } from '../src/contexts/DiaryContext';
+import { useColorScheme } from '../src/hooks';
 
 export const unstable_settings = {
   initialRouteName: 'splash',
@@ -35,15 +37,19 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="splash" />
-          <Stack.Screen name="auth" />
-          <Stack.Screen name="(tabs)" />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <DebugProvider>
+        <DiaryProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="splash" />
+              <Stack.Screen name="auth" />
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(tabs)" />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </DiaryProvider>
+      </DebugProvider>
     </AuthProvider>
   );
 }

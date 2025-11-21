@@ -16,3 +16,59 @@ export const MOOD_OPTIONS: MoodOption[] = [
   { id: 'fear', emoji: '😱', color: '#FF8A80', label: 'Medo' },
   { id: 'angry', emoji: '🤬', color: '#FF5252', label: 'Raiva' },
 ];
+
+/**
+ * Função para obter o emoji baseado no valor salvo no diário
+ * @param savedValue - Valor salvo no campo current_mood ou em feelings array
+ * @returns Emoji correspondente ou um emoji neutro como fallback
+ */
+export function getMoodEmoji(savedValue: string): string {
+  // Busca por label (português)
+  const moodByLabel = MOOD_OPTIONS.find(mood => mood.label === savedValue);
+  if (moodByLabel) {
+    return moodByLabel.emoji;
+  }
+  
+  // Busca por ID
+  const moodById = MOOD_OPTIONS.find(mood => mood.id === savedValue);
+  if (moodById) {
+    return moodById.emoji;
+  }
+  
+  // Fallback para emoji neutro
+  return '😐';
+}
+
+/**
+ * Função para obter múltiplos emojis de um array de feelings
+ * @param feelingsArray - Array de strings com os sentimentos salvos
+ * @returns Array de emojis correspondentes
+ */
+export function getMoodEmojis(feelingsArray: string[]): string[] {
+  if (!Array.isArray(feelingsArray)) {
+    return ['😐'];
+  }
+  
+  return feelingsArray.map(feeling => getMoodEmoji(feeling));
+}
+
+/**
+ * Função para obter o MoodOption completo baseado no valor salvo
+ * @param savedValue - Valor salvo no campo current_mood ou em feelings array
+ * @returns MoodOption correspondente ou null se não encontrado
+ */
+export function getMoodOption(savedValue: string): MoodOption | null {
+  // Busca por label (português)
+  const moodByLabel = MOOD_OPTIONS.find(mood => mood.label === savedValue);
+  if (moodByLabel) {
+    return moodByLabel;
+  }
+  
+  // Busca por ID
+  const moodById = MOOD_OPTIONS.find(mood => mood.id === savedValue);
+  if (moodById) {
+    return moodById;
+  }
+  
+  return null;
+}

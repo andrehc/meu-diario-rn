@@ -1,18 +1,26 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { ThemedText, StatusBarBackground } from '../../src/components';
-import { useTheme, useAuth } from '../../src/hooks';
-import { DiaryService } from '../../src/services/diaryService';
-import { MOOD_OPTIONS, type MoodOption } from '../../src/constants/moodOptions';
+import Slider from '@react-native-community/slider';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBarBackground, ThemedText, Toast } from '../../../src/components';
+import { MOOD_OPTIONS } from '../../../src/constants/moodOptions';
+import { useAuth, useTheme, useToast } from '../../../src/hooks';
+import { DiaryService } from '../../../src/services/diaryService';
+
+interface PreselectedMood {
+  id: string;
+  label: string;
+  emoji: string;
+}
 
 export default function AddEntryScreen() {
   const { colors } = useTheme();
   const { user } = useAuth();
   const router = useRouter();
+  const toast = useToast();
+  const { preselectedMoods } = useLocalSearchParams<{ preselectedMoods?: string }>();
   
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [title, setTitle] = useState('');
@@ -23,6 +31,35 @@ export default function AddEntryScreen() {
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [intensity, setIntensity] = useState<number>(5); // Intensidade da emoção (1-10)
   const [isLoading, setIsLoading] = useState(false);
+  const hasProcessedPreselected = useRef(false);
+
+  // Processa emoções pré-selecionadas quando o componente monta
+  useEffect(() => {
+    if (preselectedMoods && !hasProcessedPreselected.current) {
+      try {
+        const moods: PreselectedMood[] = JSON.parse(decodeURIComponent(preselectedMoods));
+        const moodIds = moods.map(mood => mood.id);
+        console.log('🎯 [ADD_ENTRY] Emoções pré-selecionadas:', moods);
+        
+        setSelectedMoods(moodIds);
+        hasProcessedPreselected.current = true;
+        
+        // Mostra toast informativo após um delay para garantir que o componente está totalmente montado
+        const timeoutId = setTimeout(() => {
+          const moodLabels = moods.map(m => m.label).join(', ');
+          toast.showInfo(
+            'Emoções pré-selecionadas', 
+            `${moods.length === 1 ? 'Emoção' : 'Emoções'} selecionadas: ${moodLabels}`
+          );
+        }, 500);
+        
+        // Cleanup do timeout se o componente for desmontado
+        return () => clearTimeout(timeoutId);
+      } catch (error) {
+        console.error('❌ [ADD_ENTRY] Erro ao processar emoções pré-selecionadas:', error);
+      }
+    }
+  }, [preselectedMoods, toast.showInfo]); // Usando apenas showInfo para evitar recriação desnecessária
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('pt-BR', {
@@ -46,22 +83,22 @@ export default function AddEntryScreen() {
 
   const handleSave = async () => {
     if (!user?.id) {
-      Alert.alert('Erro', 'Usuário não encontrado. Faça login novamente.');
+      toast.showError('Erro', 'Usuário não encontrado. Faça login novamente.');
       return;
     }
 
     if (!title.trim()) {
-      Alert.alert('Título obrigatório', 'Por favor, adicione um título para sua memória.');
+      toast.showWarning('Título obrigatório', 'Por favor, adicione um título para sua memória.');
       return;
     }
     
     if (!thoughts.trim()) {
-      Alert.alert('Pensamentos obrigatórios', 'Por favor, escreva seus pensamentos sobre hoje.');
+      toast.showWarning('Pensamentos obrigatórios', 'Por favor, escreva seus pensamentos sobre hoje.');
       return;
     }
     
     if (selectedMoods.length === 0) {
-      Alert.alert('Emoção obrigatória', 'Por favor, selecione pelo menos uma emoção.');
+      toast.showWarning('Emoção obrigatória', 'Por favor, selecione pelo menos uma emoção.');
       return;
     }
 
@@ -86,29 +123,21 @@ export default function AddEntryScreen() {
         current_mood: selectedMoodLabels[0], // Primeiro mood como principal
       } as any; // Temporário até ajustar os tipos
 
-      console.log('💾 [ADD_ENTRY] Salvando entrada:', diaryEntryData);
       
       const entryId = await DiaryService.createDiaryEntry(diaryEntryData);
       
       console.log('✅ [ADD_ENTRY] Entrada salva com ID:', entryId);
       
-      Alert.alert(
-        'Memória salva!',
-        'Sua memória foi salva com sucesso.',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.back()
-          }
-        ]
-      );
+      // WebSocket automaticamente notificará todos os componentes sobre a nova entrada
+      toast.showSuccess('Memória salva!', 'Sua memória foi salva com sucesso.');
+      
+      // Aguarda um pouco para mostrar o toast antes de voltar
+      setTimeout(() => {
+        router.back();
+      }, 1500);
     } catch (error) {
       console.error('❌ [ADD_ENTRY] Erro ao salvar:', error);
-      Alert.alert(
-        'Erro ao salvar',
-        'Não foi possível salvar sua memória. Tente novamente.',
-        [{ text: 'OK' }]
-      );
+      toast.showError('Erro ao salvar', 'Não foi possível salvar sua memória. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -261,6 +290,11 @@ export default function AddEntryScreen() {
             <ThemedText variant="body" style={[styles.moodLabel, { color: colors.text.secondary }]}>
               Como você está se sentindo? (Selecione uma ou mais emoções)
             </ThemedText>
+            {preselectedMoods && (
+              <ThemedText variant="caption" style={[styles.preselectedNote, { color: colors.primary }]}>
+                ✨ Emoções pré-selecionadas da tela inicial
+              </ThemedText>
+            )}
             {selectedMoods.length > 0 && (
               <ThemedText variant="caption" style={[styles.selectedCount, { color: colors.text.primary }]}>
                 {selectedMoods.length} emoção{selectedMoods.length > 1 ? 'ões' : ''} selecionada{selectedMoods.length > 1 ? 's' : ''}
@@ -278,7 +312,7 @@ export default function AddEntryScreen() {
                   onPress={() => toggleMood(mood.id)}
                 >
                   <ThemedText style={styles.moodEmoji}>{mood.emoji}</ThemedText>
-                  <ThemedText style={styles.moodLabel}>{mood.label}</ThemedText>
+                  <ThemedText style={styles.moodItemLabel}>{mood.label}</ThemedText>
                   {selectedMoods.includes(mood.id) && (
                     <View style={styles.selectedIndicator}>
                       <ThemedText style={styles.checkmark}>✓</ThemedText>
@@ -300,6 +334,20 @@ export default function AddEntryScreen() {
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
+      
+      {/* Toast Component */}
+      {toast.toastConfig && (
+        <Toast
+          visible={toast.visible}
+          type={toast.toastConfig.type}
+          title={toast.toastConfig.title}
+          message={toast.toastConfig.message}
+          duration={toast.toastConfig.duration}
+          onHide={toast.hideToast}
+          actionText={toast.toastConfig.actionText}
+          onActionPress={toast.toastConfig.onActionPress}
+        />
+      )}
     </>
   );
 }
@@ -420,7 +468,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         marginBottom: 4,
     },
-    moodLabel: {
+    moodItemLabel: {
         fontSize: 10,
         fontWeight: '500',
         textAlign: 'center',
@@ -472,5 +520,12 @@ const styles = StyleSheet.create({
     slider: {
         flex: 1,
         height: 40,
+    },
+    preselectedNote: {
+        fontSize: 12,
+        fontWeight: '500',
+        textAlign: 'center',
+        marginBottom: 8,
+        fontStyle: 'italic',
     },
 });

@@ -1,20 +1,125 @@
-import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { 
-  ThemedText, 
-  ThemedView, 
-  StatusBarBackground 
+import {
+  RecentEntryCard,
+  StatusBarBackground,
+  ThemedText,
+  ThemedView
 } from '../../src/components';
-import { useTheme } from '../../src/hooks';
+import { DiaryEventDebugger } from '../../src/components/debug/DiaryEventDebugger';
+import { QuickEmotionModal } from '../../src/components/ui/QuickEmotionModal';
 import { MOOD_OPTIONS } from '../../src/constants/moodOptions';
-import { useAuth, useLogout } from '../../src/hooks';
+import { useAuth, useLogout, useTheme } from '../../src/hooks';
 
 export default function HomeScreen() {
+  const appName = require('../../app.json').expo.name;
   const { user } = useAuth();
   const { handleLogout } = useLogout();
   const { colors } = useTheme();
+  const router = useRouter();
+
+  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Limpa o timer ao desmontar o componente
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
+  const handleMoodSelect = useCallback((moodId: string) => {
+    setSelectedMoods(prev => {
+      let newSelectedMoods: string[];
+      
+      if (prev.includes(moodId)) {
+        // Remove se já estiver selecionado
+        newSelectedMoods = prev.filter(id => id !== moodId);
+      } else {
+        // Adiciona se não estiver selecionado
+        newSelectedMoods = [...prev, moodId];
+      }
+
+      // Limpa timer anterior
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+
+      // Se há seleções, inicia novo timer
+      if (newSelectedMoods.length > 0) {
+        console.log('🕐 [HOME] Timer iniciado para', newSelectedMoods.length, 'emoções');
+        timerRef.current = setTimeout(() => {
+          console.log('⏰ [HOME] Timer disparado - mostrando modal');
+          setShowModal(true);
+        }, 5000);
+      }
+
+      return newSelectedMoods;
+    });
+  }, []);
+
+  const handleModalConfirm = useCallback(() => {
+    // Usa o estado atual de selectedMoods via função callback
+    setSelectedMoods(currentMoods => {
+      console.log('✅ [HOME] Confirmando criação de entrada com emoções:', currentMoods);
+      
+      // Prepara os parâmetros para a tela de add-entry
+      const selectedMoodData = currentMoods.map(moodId => {
+        const mood = MOOD_OPTIONS.find(m => m.id === moodId);
+        return {
+          id: moodId,
+          label: mood?.label || moodId,
+          emoji: mood?.emoji || '😐'
+        };
+      });
+
+      // Navega para add-entry com os moods pré-selecionados
+      const params = new URLSearchParams({
+        preselectedMoods: JSON.stringify(selectedMoodData)
+      });
+      
+      router.push(`/(tabs)/entries/add-entry?${params.toString()}` as any);
+      
+      // Retorna array vazio para limpar as seleções
+      return [];
+    });
+    
+    // Limpa o modal
+    setShowModal(false);
+  }, [router]);
+
+  const handleModalCancel = useCallback(() => {
+    console.log('❌ [HOME] Cancelando modal');
+    setShowModal(false);
+    setSelectedMoods([]);
+    
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  // Dados para o modal - memoizados para evitar recriações desnecessárias
+  const modalData = useMemo(() => {
+    const selectedEmojis = selectedMoods.map(moodId => {
+      const mood = MOOD_OPTIONS.find(m => m.id === moodId);
+      return mood?.emoji || '😐';
+    });
+    
+    const selectedMoodLabels = selectedMoods.map(moodId => {
+      const mood = MOOD_OPTIONS.find(m => m.id === moodId);
+      return mood?.label || moodId;
+    });
+    
+    return { selectedEmojis, selectedMoodLabels };
+  }, [selectedMoods]);
 
   return (
     <>
@@ -23,12 +128,11 @@ export default function HomeScreen() {
         <View style={[styles.header, { backgroundColor: colors.surface }]}>
           <View style={styles.logoContainer}>
             <View style={[styles.logoDot, { backgroundColor: colors.primary }]} />
-            <ThemedText variant="h2">diary</ThemedText>
+            <ThemedText variant="h2">{appName}</ThemedText>
           </View>
           <View style={styles.headerActions}>
-            {/* <TouchableOpacity style={styles.notificationButton}>
-              <Ionicons name="notifications-outline" size={24} color={colors.text.primary} />
-            </TouchableOpacity> */}
+            {/* Event Bus Debugger (Development Only) */}
+            <DiaryEventDebugger />
             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
               <Ionicons name="log-out-outline" size={24} color={colors.success} />
             </TouchableOpacity>
@@ -46,7 +150,7 @@ export default function HomeScreen() {
               Olá, {user?.name || 'Usuário'}! 👋
             </ThemedText>
             <ThemedText variant="h2" style={styles.question}>
-              Como você está se sentindo hoje?
+              Como você está se sentindo agora?
             </ThemedText>
             
             <ScrollView 
@@ -54,54 +158,43 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.moodSelector}
             >
-              {MOOD_OPTIONS.map((mood, index) => (
-                <TouchableOpacity
-                  key={mood.id}
-                  style={[styles.moodButton, { backgroundColor: mood.color }]}
-                >
-                  <Text style={styles.emoji}>{mood.emoji}</Text>
-                </TouchableOpacity>
-              ))}
+              {MOOD_OPTIONS.map((mood) => {
+                const isSelected = selectedMoods.includes(mood.id);
+                return (
+                  <TouchableOpacity
+                    key={mood.id}
+                    style={[
+                      styles.moodButton, 
+                      { backgroundColor: mood.color },
+                      isSelected && styles.selectedMoodButton
+                    ]}
+                    onPress={() => handleMoodSelect(mood.id)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.emoji}>{mood.emoji}</Text>
+                    {isSelected && (
+                      <View style={styles.selectedIndicator}>
+                        <Ionicons name="checkmark" size={12} color="#fff" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </ScrollView>
           </ThemedView>
 
           {/* Recently Added Section */}
-          <View style={styles.sectionHeader}>
-            <ThemedText variant="h3">Recém adicionado</ThemedText>
-            <TouchableOpacity>
-              <ThemedText color="secondary">Ver tudo</ThemedText>
-            </TouchableOpacity>
-          </View>
-
-          {/* Entry Card */}
-          <ThemedView variant="card" style={styles.entryCard}>
-            <View style={styles.entryHeader}>
-              <Text style={styles.smiley}>😊</Text>
-              <TouchableOpacity style={styles.moreIcon}>
-                <MaterialCommunityIcons 
-                  name="dots-vertical" 
-                  size={24} 
-                  color={colors.text.secondary} 
-                />
-              </TouchableOpacity>
-            </View>
-            <View style={[styles.dateBadge, { backgroundColor: colors.primary }]}>
-              <AntDesign name="calendar" size={14} color={colors.text.inverse} />
-              <ThemedText 
-                style={[styles.dateText, { color: colors.text.inverse }]}
-              >
-                28 May 21
-              </ThemedText>
-            </View>
-            <ThemedText variant="h3" style={styles.entryTitle}>
-              First day in work
-            </ThemedText>
-            <ThemedText color="tertiary" style={styles.entryContent}>
-              TODO: buscar o ultimo registro do diario;
-              titulo, data, humor e conteúdo
-            </ThemedText>
-          </ThemedView>
+          <RecentEntryCard />
         </ScrollView>
+        
+        {/* Quick Emotion Modal */}
+        <QuickEmotionModal
+          visible={showModal}
+          selectedEmojis={modalData.selectedEmojis}
+          selectedMoodLabels={modalData.selectedMoodLabels}
+          onConfirm={handleModalConfirm}
+          onCancel={handleModalCancel}
+        />
       </SafeAreaView>
     </>
   );
@@ -179,9 +272,31 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    position: 'relative',
+  },
+  selectedMoodButton: {
+    borderColor: '#fff',
+    borderWidth: 3,
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6,
+    transform: [{ scale: 1.05 }],
   },
   emoji: {
     fontSize: 24,
+  },
+  selectedIndicator: {
+    position: 'absolute',
+    top: -3,
+    right: -3,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#4CAF50',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   sectionHeader: {
     flexDirection: 'row',

@@ -1,9 +1,9 @@
-import React from 'react';
-import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useThemeColor } from '../../hooks/useTheme';
-import { spacing, shadows } from '../../theme';
+import { shadows, spacing } from '../../theme';
 
 interface BottomNavigationProps {
   currentScreen?: 'home' | 'stats' | 'calendar' | 'settings';
@@ -20,7 +20,7 @@ export function BottomNavigation({ currentScreen = 'home' }: BottomNavigationPro
   const surfaceColor = useThemeColor({}, 'background');
 
   const handleAddEntry = () => {
-    router.push('/(tabs)/add-entry');
+    router.push('/(tabs)/entries/add-entry');
   };
 
   const handleHomePress = () => {
@@ -32,7 +32,7 @@ export function BottomNavigation({ currentScreen = 'home' }: BottomNavigationPro
   };
 
   const handleCalendarPress = () => {
-    router.push('/(tabs)/calendar');
+    router.push('/(tabs)/entries/entries');
   };
 
   const handleSettingsPress = () => {

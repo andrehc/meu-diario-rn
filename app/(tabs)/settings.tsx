@@ -1,21 +1,28 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { 
-  ThemedText, 
-  ThemedView, 
-  StatusBarBackground 
+import {
+  StatusBarBackground,
+  ThemedText,
+  ThemedView,
+  Toast
 } from '../../src/components';
-import { useTheme } from '../../src/hooks';
-import { useAuth, useLogout } from '../../src/hooks';
+import { useDebug } from '../../src/contexts/DebugContext';
+import { useAuth, useLogout, useTheme, useToast } from '../../src/hooks';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { handleLogout } = useLogout();
   const { colors } = useTheme();
+  const toast = useToast();
+  const { isEventBusDebugEnabled, toggleEventBusDebug } = useDebug();
+
+  const showToastDemo = () => {
+    toast.showInfo('Toast Demo', 'Este é um exemplo do nosso toast personalizado!');
+  };
 
   const handleBack = () => {
     if (router.canGoBack()) {
@@ -63,6 +70,18 @@ export default function SettingsScreen() {
       subtitle: 'FAQ e suporte',
       onPress: () => {},
     },
+    {
+      icon: 'information-circle-outline',
+      title: 'Testar Toast',
+      subtitle: 'Demonstração do toast personalizado',
+      onPress: showToastDemo,
+    },
+    ...(__DEV__ ? [{
+      icon: 'bug-outline',
+      title: 'EventBus Debug',
+      subtitle: isEventBusDebugEnabled ? 'Debug habilitado 🐛' : 'Debug desabilitado',
+      onPress: toggleEventBusDebug,
+    }] : []),
   ];
 
   return (
@@ -133,6 +152,20 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
+      
+      {/* Toast Component */}
+      {toast.toastConfig && (
+        <Toast
+          visible={toast.visible}
+          type={toast.toastConfig.type}
+          title={toast.toastConfig.title}
+          message={toast.toastConfig.message}
+          duration={toast.toastConfig.duration}
+          onHide={toast.hideToast}
+          actionText={toast.toastConfig.actionText}
+          onActionPress={toast.toastConfig.onActionPress}
+        />
+      )}
     </>
   );
 }
