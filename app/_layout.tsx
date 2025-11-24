@@ -11,6 +11,7 @@ import 'react-native-reanimated';
 import { AuthProvider } from '../src/contexts/AuthContext';
 import { DebugProvider } from '../src/contexts/DebugContext';
 import { DiaryProvider } from '../src/contexts/DiaryContext';
+import { ThemeProvider as CustomThemeProvider } from '../src/contexts/ThemeContext';
 import { useColorScheme } from '../src/hooks';
 
 export const unstable_settings = {
@@ -37,19 +38,21 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <DebugProvider>
-        <DiaryProvider>
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="splash" />
-              <Stack.Screen name="auth" />
-              <Stack.Screen name="index" />
-              <Stack.Screen name="(tabs)" />
-            </Stack>
-            <StatusBar style="auto" />
-          </ThemeProvider>
-        </DiaryProvider>
-      </DebugProvider>
+      <CustomThemeProvider>
+        <DebugProvider>
+          <DiaryProvider>
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="splash" />
+                <Stack.Screen name="auth" />
+                <Stack.Screen name="index" />
+                <Stack.Screen name="(tabs)" />
+              </Stack>
+              <StatusBar style="auto" />
+            </ThemeProvider>
+          </DiaryProvider>
+        </DebugProvider>
+      </CustomThemeProvider>
     </AuthProvider>
   );
 }

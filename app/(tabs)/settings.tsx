@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   StatusBarBackground,
@@ -16,12 +16,18 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { handleLogout } = useLogout();
-  const { colors } = useTheme();
+  const { colors, styles: themeStyles, setTheme, currentTheme, isDark } = useTheme();
   const toast = useToast();
   const { isEventBusDebugEnabled, toggleEventBusDebug } = useDebug();
 
   const showToastDemo = () => {
     toast.showInfo('Toast Demo', 'Este é um exemplo do nosso toast personalizado!');
+  };
+
+  const handleThemeToggle = async () => {
+    const newTheme = isDark ? 'light' : 'dark';
+    await setTheme(newTheme);
+    toast.showSuccess('Tema alterado', `Tema ${newTheme === 'dark' ? 'escuro' : 'claro'} ativado`);
   };
 
   const handleBack = () => {
@@ -55,8 +61,10 @@ export default function SettingsScreen() {
     {
       icon: 'color-palette-outline',
       title: 'Tema',
-      subtitle: 'Claro, escuro ou automático',
-      onPress: () => {},
+      subtitle: `${currentTheme === 'dark' ? 'Escuro (Dracula)' : 'Claro'}`,
+      onPress: handleThemeToggle,
+      hasToggle: true,
+      toggleValue: isDark,
     },
     {
       icon: 'download-outline',
@@ -81,6 +89,8 @@ export default function SettingsScreen() {
       title: 'EventBus Debug',
       subtitle: isEventBusDebugEnabled ? 'Debug habilitado 🐛' : 'Debug desabilitado',
       onPress: toggleEventBusDebug,
+      hasToggle: true,
+      toggleValue: isEventBusDebugEnabled,
     }] : []),
   ];
 
@@ -88,7 +98,7 @@ export default function SettingsScreen() {
     <>
       <StatusBarBackground />
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={[styles.header, { backgroundColor: colors.surface }]}>
+        <View style={[themeStyles.header, { backgroundColor: colors.surface }]}>
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
           </TouchableOpacity>
@@ -129,6 +139,8 @@ export default function SettingsScreen() {
                   },
                 ]}
                 onPress={option.onPress}
+                disabled={option.hasToggle}
+                activeOpacity={option.hasToggle ? 1 : 0.7}
               >
                 <Ionicons name={option.icon as any} size={24} color={colors.text.secondary} />
                 <View style={styles.settingContent}>
@@ -137,7 +149,16 @@ export default function SettingsScreen() {
                     {option.subtitle}
                   </ThemedText>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.text.tertiary} />
+                {option.hasToggle ? (
+                  <Switch
+                    value={option.toggleValue}
+                    onValueChange={option.onPress}
+                    trackColor={{ false: colors.border, true: colors.primary }}
+                    thumbColor={option.toggleValue ? colors.surface : '#f4f3f4'}
+                  />
+                ) : (
+                  <Ionicons name="chevron-forward" size={20} color={colors.text.tertiary} />
+                )}
               </TouchableOpacity>
             ))}
           </ThemedView>
@@ -174,14 +195,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 40,
-    paddingBottom: 16,
-  },
   backButton: {
     padding: 8,
   },
@@ -199,6 +212,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 12,
     marginBottom: 16,
+    marginTop: 16
   },
   profileHeader: {
     flexDirection: 'row',

@@ -12,6 +12,7 @@ export const profiles = sqliteTable('Profile', {
   psychologist_phone: text('psychologist_phone'),
   pin_enabled: integer('pin_enabled').notNull().default(0),
   pin_hash: text('pin_hash'),
+  theme: text('theme').notNull().default('light'), // 'light' ou 'dark'
   login_provider: text('login_provider').notNull().default('local'),
   google_id: text('google_id'),
   google_access_token: text('google_access_token'),

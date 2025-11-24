@@ -1,12 +1,11 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import { useAuth, useTheme } from '@/src/hooks';
 import { useRouter } from 'expo-router';
-import { ThemedText, ThemedView } from '@/src/components';
-import { useTheme, useAuth } from '@/src/hooks';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, ImageBackground, StyleSheet, View } from 'react-native';
 
 export function SplashScreen() {
   const router = useRouter();
-  const { colors } = useTheme();
+  const  { colors }= useTheme();
   const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
@@ -18,70 +17,49 @@ export function SplashScreen() {
           router.replace('/auth/login');
         }
       }
-    }, 2000);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [isLoading, isAuthenticated]);
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.cover,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    imageBackground: {
+      flex: 1,
+      width: '100%',
+      height: '100%',
+    },
+    loaderContainer: {
+      position: 'absolute',
+      bottom: 60,
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+    },
+  });
+
   return (
-    <ThemedView style={[styles.container, { backgroundColor: colors.primary }]}>
-      <View style={styles.content}>
-        <View style={styles.logoContainer}>
-          <View style={[styles.logoDot, { backgroundColor: colors.text.inverse }]} />
-          <ThemedText 
-            variant="h1" 
-            style={[styles.logoText, { color: colors.text.inverse }]}
-          >
-            Diario.io
-          </ThemedText>
+    <View style={styles.container}>
+      <ImageBackground
+        source={require('@/src/public/assets/images/cover-transparent.png')}
+        style={styles.imageBackground}
+        resizeMode="contain"
+      >
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator
+            size="large"
+            color="#000000"
+          />
         </View>
-        
-        <ThemedText 
-          style={[styles.subtitle, { color: colors.text.inverse }]}
-        >
-          Seu diário pessoal
-        </ThemedText>
-        
-        <ActivityIndicator 
-          size="large" 
-          color={colors.text.inverse} 
-          style={styles.loader}
-        />
-      </View>
-    </ThemedView>
+      </ImageBackground>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
-    alignItems: 'center',
-  },
-  logoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  logoDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  logoText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 16,
-    opacity: 0.8,
-    marginBottom: 40,
-  },
-  loader: {
-    marginTop: 20,
-  },
-});

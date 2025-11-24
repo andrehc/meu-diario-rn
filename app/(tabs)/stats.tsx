@@ -1,22 +1,28 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ThemedText, StatusBarBackground } from '../../src/components';
+import { StatusBarBackground, ThemedText } from '../../src/components';
 import { useTheme } from '../../src/hooks';
 
 export default function StatsScreen() {
-  const { colors } = useTheme();
+  const router = useRouter();
+  const { colors, styles: themeStyles } = useTheme();
 
   return (
     <>
       <StatusBarBackground />
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.header}>
-          <ThemedText variant="h1">Estatísticas</ThemedText>
-          <ThemedText color="secondary">Visualize seus registros emocionais</ThemedText>
+        <View style={[themeStyles.header, { backgroundColor: colors.surface }]}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          </TouchableOpacity>
+            <ThemedText variant="h2">Estatísticas</ThemedText>
+          <View style={styles.placeholder} />
         </View>
-        
-        <View style={styles.content}>
+        <View style={styles.content}>        
+          <ThemedText color="secondary">Visualize seus registros emocionais</ThemedText>          
           <ThemedText color="secondary">
             📊 Aqui você verá gráficos e estatísticas dos seus registros de humor e emoções.
           </ThemedText>
@@ -33,8 +39,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    padding: 20,
+  backButton: {
+    padding: 8,
+  },
+  placeholder: {
     alignItems: 'center',
   },
   content: {

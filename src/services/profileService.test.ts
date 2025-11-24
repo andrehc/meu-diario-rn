@@ -275,4 +275,149 @@ describe('ProfileService', () => {
       expect(updatedProfile?.google_expires_at).toBe(newTokens.expiresAt);
     });
   });
+
+  describe('Gerenciamento de Tema', () => {
+    it('deve criar perfil com tema padrão light', async () => {
+      const newProfile = {
+        name: 'Usuário Teste',
+        phone: '123456789',
+        email: 'tema@test.com',
+        profile_image: '',
+        psychologist_name: '',
+        psychologist_phone: '',
+        pin_enabled: 0,
+        pin_hash: '',
+        login_provider: 'local' as const,
+      };
+
+      const profileId = await TestProfileService.createProfile(newProfile);
+      const theme = await TestProfileService.getTheme(profileId);
+
+      expect(theme).toBe('light');
+    });
+
+    it('deve atualizar tema de light para dark', async () => {
+      const newProfile = {
+        name: 'Usuário Teste',
+        phone: '123456789',
+        email: 'tema@test.com',
+        profile_image: '',
+        psychologist_name: '',
+        psychologist_phone: '',
+        pin_enabled: 0,
+        pin_hash: '',
+        login_provider: 'local' as const,
+      };
+
+      const profileId = await TestProfileService.createProfile(newProfile);
+      
+      // Verifica tema inicial
+      const initialTheme = await TestProfileService.getTheme(profileId);
+      expect(initialTheme).toBe('light');
+
+      // Atualiza para dark
+      const updateSuccess = await TestProfileService.updateTheme(profileId, 'dark');
+      expect(updateSuccess).toBe(true);
+
+      // Verifica tema atualizado
+      const updatedTheme = await TestProfileService.getTheme(profileId);
+      expect(updatedTheme).toBe('dark');
+    });
+
+    it('deve atualizar tema de dark para light', async () => {
+      const newProfile = {
+        name: 'Usuário Teste',
+        phone: '123456789',
+        email: 'tema@test.com',
+        profile_image: '',
+        psychologist_name: '',
+        psychologist_phone: '',
+        pin_enabled: 0,
+        pin_hash: '',
+        login_provider: 'local' as const,
+      };
+
+      const profileId = await TestProfileService.createProfile(newProfile);
+      
+      // Define tema como dark
+      await TestProfileService.updateTheme(profileId, 'dark');
+      expect(await TestProfileService.getTheme(profileId)).toBe('dark');
+
+      // Volta para light
+      const updateSuccess = await TestProfileService.updateTheme(profileId, 'light');
+      expect(updateSuccess).toBe(true);
+
+      const finalTheme = await TestProfileService.getTheme(profileId);
+      expect(finalTheme).toBe('light');
+    });
+
+    it('deve persistir o tema após múltiplas atualizações', async () => {
+      const newProfile = {
+        name: 'Usuário Teste',
+        phone: '123456789',
+        email: 'tema@test.com',
+        profile_image: '',
+        psychologist_name: '',
+        psychologist_phone: '',
+        pin_enabled: 0,
+        pin_hash: '',
+        login_provider: 'local' as const,
+      };
+
+      const profileId = await TestProfileService.createProfile(newProfile);
+
+      // Múltiplas mudanças de tema
+      await TestProfileService.updateTheme(profileId, 'dark');
+      expect(await TestProfileService.getTheme(profileId)).toBe('dark');
+
+      await TestProfileService.updateTheme(profileId, 'light');
+      expect(await TestProfileService.getTheme(profileId)).toBe('light');
+
+      await TestProfileService.updateTheme(profileId, 'dark');
+      expect(await TestProfileService.getTheme(profileId)).toBe('dark');
+
+      // Busca o perfil completo para verificar persistência
+      const profile = await TestProfileService.getProfile(profileId);
+      expect(profile?.theme).toBe('dark');
+    });
+
+    it('deve retornar tema light para perfil inexistente', async () => {
+      const theme = await TestProfileService.getTheme(99999);
+      expect(theme).toBe('light');
+    });
+
+    it('deve manter tema ao atualizar outros campos do perfil', async () => {
+      const newProfile = {
+        name: 'Usuário Teste',
+        phone: '123456789',
+        email: 'tema@test.com',
+        profile_image: '',
+        psychologist_name: '',
+        psychologist_phone: '',
+        pin_enabled: 0,
+        pin_hash: '',
+        login_provider: 'local' as const,
+      };
+
+      const profileId = await TestProfileService.createProfile(newProfile);
+      
+      // Define tema como dark
+      await TestProfileService.updateTheme(profileId, 'dark');
+      expect(await TestProfileService.getTheme(profileId)).toBe('dark');
+
+      // Atualiza outros campos
+      await TestProfileService.updateProfile(profileId, {
+        name: 'Nome Atualizado',
+        phone: '987654321',
+      });
+
+      // Verifica que o tema não foi alterado
+      const themeAfterUpdate = await TestProfileService.getTheme(profileId);
+      expect(themeAfterUpdate).toBe('dark');
+
+      const profile = await TestProfileService.getProfile(profileId);
+      expect(profile?.name).toBe('Nome Atualizado');
+      expect(profile?.theme).toBe('dark');
+    });
+  });
 });

@@ -24,7 +24,7 @@ import { DiaryEntry } from '../../../src/types/database';
 const ITEMS_PER_PAGE = 10;
 
 export default function EntriesScreen() {
-    const { colors } = useTheme();
+    const { colors, styles: themeStyles } = useTheme();
     const { user } = useAuth();
     const router = useRouter();
     const toast = useToast();
@@ -260,7 +260,7 @@ export default function EntriesScreen() {
             <StatusBarBackground />
             <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
                 {/* Header */}
-                <View style={[styles.header, { backgroundColor: colors.surface }]}>
+                <View style={[themeStyles.header, { backgroundColor: colors.surface }]}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                         <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
                     </TouchableOpacity>
@@ -322,16 +322,6 @@ export default function EntriesScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingTop: 40,
-        paddingBottom: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(0,0,0,0.1)',
     },
     backButton: {
         padding: 8,

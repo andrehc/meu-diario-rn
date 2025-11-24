@@ -219,6 +219,7 @@ export const initSQLiteDB = async () => {
         psychologist_phone TEXT,
         pin_enabled INTEGER NOT NULL DEFAULT 0,
         pin_hash TEXT,
+        theme TEXT NOT NULL DEFAULT 'light',
         login_provider TEXT NOT NULL DEFAULT 'local',
         google_id TEXT,
         google_access_token TEXT,
@@ -243,6 +244,19 @@ export const initSQLiteDB = async () => {
         FOREIGN KEY (profile_id) REFERENCES Profile (id) ON DELETE CASCADE
       );`
     );
+    
+    // Migração: adicionar coluna theme se não existir
+    try {
+      sqliteDatabase.execSync(`
+        ALTER TABLE Profile ADD COLUMN theme TEXT NOT NULL DEFAULT 'light';
+      `);
+      console.log('✅ Coluna theme adicionada com sucesso');
+    } catch (error: any) {
+      // Ignora erro se a coluna já existe
+      if (!error.message?.includes('duplicate column')) {
+        console.log('ℹ️ Coluna theme já existe ou erro ignorado:', error.message);
+      }
+    }
     
     console.log('✅ SQLite DB inicializado com sucesso');
     return sqliteDatabase;

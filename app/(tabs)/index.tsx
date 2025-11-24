@@ -125,20 +125,6 @@ export default function HomeScreen() {
     <>
       <StatusBarBackground />
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={[styles.header, { backgroundColor: colors.surface }]}>
-          <View style={styles.logoContainer}>
-            <View style={[styles.logoDot, { backgroundColor: colors.primary }]} />
-            <ThemedText variant="h2">{appName}</ThemedText>
-          </View>
-          <View style={styles.headerActions}>
-            {/* Event Bus Debugger (Development Only) */}
-            <DiaryEventDebugger />
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <Ionicons name="log-out-outline" size={24} color={colors.success} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
         <ScrollView 
           style={styles.content} 
           contentContainerStyle={styles.scrollContent}
@@ -246,6 +232,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 12,
     marginBottom: 16,
+    marginTop: 16
   },
   greeting: {
     marginBottom: 4,

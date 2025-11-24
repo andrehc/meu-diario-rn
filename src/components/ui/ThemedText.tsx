@@ -1,6 +1,6 @@
+import { useTheme } from '@/src/hooks';
 import React from 'react';
 import { StyleSheet, Text, type TextProps } from 'react-native';
-import { useThemeColor, useTheme } from '@/src/hooks';
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
@@ -19,12 +19,12 @@ export function ThemedText({
   color: colorProp,
   ...rest
 }: ThemedTextProps) {
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   
   // Determinar cor final
   let finalColor: string;
   if (lightColor && darkColor) {
-    finalColor = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+    finalColor = isLight ? lightColor : darkColor;
   } else if (colorProp) {
     const textColors = colors.text;
     switch (colorProp) {
@@ -52,7 +52,9 @@ export function ThemedText({
         finalColor = (typeof textColors === 'string' ? textColors : '#000');
     }
   } else {
-    finalColor = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+    finalColor = (typeof colors.text === 'object' && colors.text.primary) 
+      ? colors.text.primary 
+      : (typeof colors.text === 'string' ? colors.text : '#000');
   }
   
   // Determinar estilo do variant

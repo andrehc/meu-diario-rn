@@ -1,4 +1,5 @@
 import { useColorScheme } from 'react-native';
+import { useThemeContext } from '../contexts/ThemeContext';
 
 /**
  * Hook para usar cores do tema com base no esquema de cores (light/dark)
@@ -29,6 +30,7 @@ export function useCustomColorScheme(): 'light' | 'dark' {
  * Definição das cores do tema
  */
 const Colors = {
+  cover: '#E4E2DD',
   light: {
     // Cores principais (suas cores originais)
     text: '#11181C',
@@ -78,26 +80,44 @@ const Colors = {
 };
 
 /**
+ * Estilos globais do tema
+ */
+const ThemeStyles = {
+  header: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 16,
+  },
+};
+
+/**
  * Hook para usar tema completo
  */
 export function useTheme() {
-  const colorScheme = useCustomColorScheme();
+  const { theme: colorScheme, setTheme, isDark, isLight } = useThemeContext();
   const themeColors = Colors[colorScheme];
   
-    return {
+  return {
     colors: {
       ...themeColors,
+      cover: Colors.cover,
       text: {
         primary: themeColors.text,
         secondary: themeColors.textSecondary || themeColors.icon,
         tertiary: themeColors.icon,
         inverse: colorScheme === 'dark' ? '#f8f8f2' : '#ffffff',
       },
-      border: themeColors.icon, // Usando icon como border color
+      border: themeColors.icon,
       error: themeColors.error,
     },
-    isDark: colorScheme === 'dark',
-    isLight: colorScheme === 'light',
+    styles: ThemeStyles,
+    isDark,
+    isLight,
+    setTheme,
+    currentTheme: colorScheme,
   };
 }
 

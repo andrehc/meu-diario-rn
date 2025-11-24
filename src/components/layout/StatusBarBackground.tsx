@@ -1,7 +1,7 @@
+import { useTheme } from '@/src/hooks';
 import React from 'react';
-import { View, StyleSheet, StatusBar, Platform } from 'react-native';
+import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useThemeColor, useColorScheme } from '@/src/hooks';
 
 interface StatusBarBackgroundProps {
   backgroundColor?: string;
@@ -11,11 +11,10 @@ export function StatusBarBackground({
   backgroundColor 
 }: StatusBarBackgroundProps) {
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
-  const defaultBgColor = useThemeColor({}, 'baseColor');
+  const { colors, isDark } = useTheme();
   
-  const bgColor = backgroundColor || defaultBgColor;
-  const barStyle = colorScheme === 'dark' ? 'light-content' : 'light-content';
+  const bgColor = backgroundColor || colors.baseColor;
+  const barStyle = isDark ? 'light-content' : 'dark-content';
 
   return (
     <>

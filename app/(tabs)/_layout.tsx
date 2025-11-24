@@ -1,3 +1,4 @@
+import { AppHeader } from '@/src/components/ui/AppHeader';
 import { Stack } from 'expo-router';
 import React from 'react';
 import { BottomNavigation } from '../../src/components';
@@ -5,6 +6,7 @@ import { BottomNavigation } from '../../src/components';
 export default function TabLayout() {
   return (
     <>
+      <AppHeader />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="stats" />

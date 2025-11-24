@@ -1,9 +1,9 @@
 
 import {
-  CreateGoogleProfileData,
-  CreateLocalProfileData,
-  GoogleAuthData,
-  Profile
+    CreateGoogleProfileData,
+    CreateLocalProfileData,
+    GoogleAuthData,
+    Profile
 } from '../types/database';
 
 // Serviços usando Drizzle ORM
@@ -273,5 +273,18 @@ export class ProfileService {
       google_refresh_token: tokens.refreshToken || null,
       google_expires_at: tokens.expiresAt,
     });
+  }
+
+  // Atualizar tema do perfil
+  static async updateTheme(profileId: number, theme: 'light' | 'dark'): Promise<boolean> {
+    console.log('🎨 [ProfileService] Atualizando tema do perfil:', profileId, 'para:', theme);
+    return await this.updateProfile(profileId, { theme });
+  }
+
+  // Obter tema do perfil
+  static async getTheme(profileId: number): Promise<'light' | 'dark'> {
+    console.log('🎨 [ProfileService] Buscando tema do perfil:', profileId);
+    const profile = await this.getProfile(profileId);
+    return (profile?.theme as 'light' | 'dark') || 'light';
   }
 }

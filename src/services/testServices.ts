@@ -163,6 +163,15 @@ export class TestProfileService {
       google_expires_at: tokens.expiresAt,
     });
   }
+
+  static async updateTheme(profileId: number, theme: 'light' | 'dark'): Promise<boolean> {
+    return await this.updateProfile(profileId, { theme });
+  }
+
+  static async getTheme(profileId: number): Promise<'light' | 'dark'> {
+    const profile = await this.getProfile(profileId);
+    return (profile?.theme as 'light' | 'dark') || 'light';
+  }
 }
 
 export class TestDiaryService {

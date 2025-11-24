@@ -4,7 +4,7 @@
     "slug": "meu-insight",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./src/public/assets/images/capa.png",
+    "icon": "./src/public/assets/images/2.png",
     "scheme": "meuinsight",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,10 +13,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./src/public/assets/images/android-icon-foreground.png",
-        "backgroundImage": "./src/public/assets/images/android-icon-background.png",
-        "monochromeImage": "./src/public/assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#ffffff",
+        "foregroundImage": "./src/public/assets/images/2.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -24,7 +22,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./src/public/assets/images/favicon.png"
+      "favicon": "./src/public/assets/images/2.png"
     },
     "plugins": [
       "expo-dev-client",
@@ -32,11 +30,12 @@
       [
         "expo-splash-screen",
         {
-          "image": "./src/public/assets/images/splash-icon.png",
+          "image": "./src/public/assets/images/1.png",
           "imageWidth": 200,
-          "resizeMode": "contain",
+          "resizeMode": "cover",
           "backgroundColor": "#ffffff",
           "dark": {
+            "image": "./src/public/assets/images/1.png",
             "backgroundColor": "#000000"
           }
         }

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useThemeColor } from '../../hooks/useTheme';
+import { useTheme } from '../../hooks/useTheme';
 import { shadows, spacing } from '../../theme';
 
 interface BottomNavigationProps {
@@ -11,13 +11,14 @@ interface BottomNavigationProps {
 
 export function BottomNavigation({ currentScreen = 'home' }: BottomNavigationProps) {
   const router = useRouter();
-  
+  const { colors } = useTheme();
+
   // Cores temáticas
-  const backgroundColor = useThemeColor({}, 'baseColor');
-  const primaryColor = useThemeColor({}, 'primary');
-  const secondaryColor = useThemeColor({}, 'secondary');
-  const inactiveColor = useThemeColor({}, 'textSecondary');
-  const surfaceColor = useThemeColor({}, 'background');
+  const backgroundColor = colors.baseColor;
+  const primaryColor = colors.primary;
+  const secondaryColor = colors.secondary;
+  const inactiveColor = colors.textSecondary;
+  const surfaceColor = colors.background;
 
   const handleAddEntry = () => {
     router.push('/(tabs)/entries/add-entry');
@@ -42,21 +43,24 @@ export function BottomNavigation({ currentScreen = 'home' }: BottomNavigationPro
   return (
     <>
       {/* Floating Action Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
-          styles.fab, 
-          { 
+          styles.fab,
+          {
             backgroundColor: secondaryColor,
             borderColor: surfaceColor,
           }
-        ]} 
+        ]}
         onPress={handleAddEntry}
       >
-        <Ionicons name="add" size={28} color="#ffffff" />
+        <Ionicons name="add" size={40} color={colors.tint} />
       </TouchableOpacity>
 
       {/* Bottom Navigation Bar */}
-      <View style={[styles.bottomNav, { backgroundColor }]}>
+      <View style={[styles.bottomNav, { 
+        backgroundColor,
+        borderTopColor: colors.border 
+      }]}>
         {/* Left Side Items */}
         <View style={styles.navSide}>
           <TouchableOpacity style={styles.navItem} onPress={handleHomePress}>
@@ -123,7 +127,6 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: 'row',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
     paddingVertical: spacing.s,
     paddingBottom: 20,
     paddingHorizontal: spacing.l,
